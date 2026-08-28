@@ -32,13 +32,21 @@ The governing principle throughout: **calibrate to the human distribution, don't
 
 ## Install
 
-Default is **user scope** — install once, and the skill follows you into every project.
+Default is **user scope** — install once, and the skill follows you into every project. The CLI routes below are user-scope out of the box; the in-session `/plugin install` dialog instead asks you to pick a scope, so choose **User** there.
 
-**Claude Code (Grok Build rides along):**
+**Skills CLI (77+ agents, pick yours when prompted):**
 
-```text
-/plugin marketplace add Nanako0129/sepia
-/plugin install sepia@sepia
+```bash
+npx skills add Nanako0129/sepia -g
+```
+
+`-g` is what makes it user scope (the default is project). Update later with `npx skills update -g`.
+
+**Claude Code plugin (Grok Build rides along):**
+
+```bash
+claude plugin marketplace add Nanako0129/sepia
+claude plugin install sepia@sepia --scope user
 ```
 
 Grok Build auto-discovers Claude Code's plugins; nothing more to do there.
