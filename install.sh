@@ -13,8 +13,9 @@ link() {
   echo "linked  $2"
 }
 
-link "$SKILL" "$HOME/.claude/skills/sepia"   # Claude Code (Grok Build auto-discovers this too)
+link "$SKILL" "$HOME/.claude/skills/sepia"   # Claude Code
 link "$SKILL" "$HOME/.agents/skills/sepia"   # Codex (user scope)
+link "$SKILL" "$HOME/.grok/skills/sepia"     # Grok Build native path — works with or without Claude Code installed
 
 # Antigravity global skills dir (copy: keep in sync by re-running install.sh)
 AG="$HOME/.gemini/config/skills/sepia"
@@ -31,9 +32,10 @@ echo "copied  $WF"
 
 echo ""
 echo "Installed at user scope:"
-echo "  Claude Code + Grok Build : ~/.claude/skills/sepia (symlink)"
-echo "  Codex                    : ~/.agents/skills/sepia (symlink)"
-echo "  Antigravity              : ~/.gemini/config/skills/sepia (copy) + /sepia workflow"
+echo "  Claude Code : ~/.claude/skills/sepia (symlink)"
+echo "  Codex       : ~/.agents/skills/sepia (symlink)"
+echo "  Grok Build  : ~/.grok/skills/sepia (symlink)"
+echo "  Antigravity : ~/.gemini/config/skills/sepia (copy) + /sepia workflow"
 echo ""
 echo "Keep this clone: the symlinks point into it. 'git pull' updates the"
 echo "symlinked installs; re-run install.sh after pulling to refresh the"

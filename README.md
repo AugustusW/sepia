@@ -49,7 +49,9 @@ claude plugin marketplace add Nanako0129/sepia
 claude plugin install sepia@sepia --scope user
 ```
 
-Grok Build auto-discovers Claude Code's plugins; nothing more to do there.
+Grok Build auto-discovers Claude Code's plugins, so this install covers Grok users who also run Claude Code.
+
+**Grok Build without Claude Code:** run `./install.sh` (links into Grok's native `~/.grok/skills/`), or add `Nanako0129/sepia` as a marketplace source in Grok's Marketplace tab — Grok consumes Claude Code marketplace repos directly.
 
 **All four platforms at once:**
 
@@ -62,8 +64,9 @@ git clone https://github.com/Nanako0129/sepia.git ~/.sepia
 
 | Platform | Where | Mechanism |
 |---|---|---|
-| Claude Code + Grok Build | `~/.claude/skills/sepia` | symlink |
+| Claude Code | `~/.claude/skills/sepia` | symlink |
 | Codex | `~/.agents/skills/sepia` | symlink |
+| Grok Build | `~/.grok/skills/sepia` (native path, no Claude Code needed) | symlink |
 | Antigravity | `~/.gemini/config/skills/sepia` + `/sepia` global workflow | copy |
 
 Keep the clone — the symlinks point into it. `git pull` updates Claude Code, Grok, and Codex in place; re-run `install.sh` after pulling to refresh the Antigravity copy.
