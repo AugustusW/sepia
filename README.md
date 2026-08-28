@@ -1,5 +1,7 @@
 # sepia
 
+**English** | [繁體中文](README.zh-TW.md)
+
 > De-AI writing at the layer that actually gives AI away. Fiction gets its narrative architecture repaired before anyone touches word choice; professional documents (release notes, PR replies, postmortems, tickets, technical articles) each get rules matched to their venue.
 
 A portable [Agent Skill](https://agentskills.io/specification) for Claude Code, Codex, Grok Build, and Antigravity. One canonical `SKILL.md`, no per-platform forks. Four operations: **write**, **review** (diagnose only), **refactor** (minimal edits), **recreate** (full rewrite).
@@ -53,14 +55,13 @@ Grok Build auto-discovers Claude Code's plugins, so this install covers Grok use
 
 **Grok Build without Claude Code:** run `./install.sh` (links into Grok's native `~/.grok/skills/`), or add `Nanako0129/sepia` as a marketplace source in Grok's Marketplace tab — Grok consumes Claude Code marketplace repos directly.
 
-**All four platforms at once:**
+**All four platforms, one line:**
 
 ```bash
-git clone https://github.com/Nanako0129/sepia.git ~/.sepia
-~/.sepia/install.sh
+curl -fsSL https://raw.githubusercontent.com/Nanako0129/sepia/main/install.sh | bash
 ```
 
-`install.sh` installs at user scope only:
+This clones the repo to `~/.sepia` (override with `SEPIA_HOME`) and installs at user scope; re-run the same line to update everything. Prefer to inspect first? Clone it yourself and run `./install.sh` from the checkout — same result. Either way it installs:
 
 | Platform | Where | Mechanism |
 |---|---|---|
@@ -68,8 +69,6 @@ git clone https://github.com/Nanako0129/sepia.git ~/.sepia
 | Codex | `~/.agents/skills/sepia` | symlink |
 | Grok Build | `~/.grok/skills/sepia` (native path, no Claude Code needed) | symlink |
 | Antigravity | `~/.gemini/config/skills/sepia` + `/sepia` global workflow | copy |
-
-Keep the clone — the symlinks point into it. `git pull` updates Claude Code, Grok, and Codex in place; re-run `install.sh` after pulling to refresh the Antigravity copy.
 
 **Project scope (alternative):** when one repo should pin its own copy, commit `skills/sepia/` into that repo as `.agents/skills/sepia` (Codex + Antigravity) or `.claude/skills/sepia` (Claude Code).
 
@@ -93,12 +92,6 @@ sepia/
 ├── install.sh
 └── research/                # digested evidence base with sources
 ```
-
-## 中文說明
-
-sepia 是一個去 AI 味的寫作 skill。小說模式不從詞彙下手：StoryScope 證實真正暴露 AI 身分的是敘事架構——主題講得太白、情節單線到底、情緒全靠身體感官、時間永遠線性、結局收得乾乾淨淨。先修這一層，再輪到篇章與字句；內含 30 特徵診斷 rubric 與各模型指紋表。
-
-專業文書（release 公告、PR/issue 回覆、postmortem、工單、技術文章）各有自己的規則檔，核心是同一件事：對齊 venue 的語域、每個宣稱附上真實 artifact、該下判斷的地方下判斷。支援 write／review（只診斷）／refactor（最小修改）／recreate（重寫）四種操作。校準原則：往人類分布的中間帶靠；把 AI 特徵反轉到極端，只會做出新的指紋。
 
 ## Sources
 
