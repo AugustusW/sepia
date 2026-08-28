@@ -34,43 +34,88 @@ sepia 把這些量化落差，連同 [`research/`](research/) 裡消化過的十
 
 ## 安裝
 
-預設 **user scope**——裝一次，每個專案都能用。下列 CLI 路徑本身就是 user scope；session 內的 `/plugin install` 對話框會要你選 scope，記得選 **User**。
+每個平台都有自己的原生安裝方式，並各自配對更新指令。全部預設 **user scope**——裝一次，每個專案都能用。
 
-**Skills CLI（77+ 個 agent，執行時選你的）：**
-
-```bash
-npx skills add Nanako0129/sepia -g
-```
-
-`-g` 才是 user scope（預設是 project）。之後用 `npx skills update -g` 更新。
-
-**Claude Code plugin（Grok Build 順帶生效）：**
+### Claude Code
 
 ```bash
+# 安裝
 claude plugin marketplace add Nanako0129/sepia
 claude plugin install sepia@sepia --scope user
+
+# 更新
+claude plugin marketplace update sepia
+claude plugin update sepia
 ```
 
-Grok Build 會自動探索 Claude Code 的 plugin，所以同時用 Claude Code 的 Grok 使用者裝這份就夠。
+session 內的 `/plugin install` 對話框會要你選 scope——記得選 **User**。
 
-**沒有 Claude Code 的 Grok Build：**跑 `./install.sh`（鏈進 Grok 原生的 `~/.grok/skills/`），或在 Grok 的 Marketplace 分頁直接加 `Nanako0129/sepia`——Grok 可直接使用 Claude Code 格式的 marketplace repo。
+### Codex
 
-**四平台一行裝完：**
+```bash
+# 安裝
+codex plugin marketplace add Nanako0129/sepia
+codex plugin add sepia@sepia
+
+# 更新——先刷新 marketplace 快照，再重跑 add 換上新版本
+codex plugin marketplace upgrade sepia
+codex plugin add sepia@sepia
+```
+
+### Grok Build
+
+```bash
+# 安裝
+grok plugin install Nanako0129/sepia --trust
+
+# 更新
+grok plugin update
+```
+
+若你同時裝了 Claude Code 版的 sepia，Grok 也會自動探索到；兩條路都通。
+
+### Antigravity
+
+這裡沒有 marketplace——原生安裝就是放置 skill 資料夾，外加 `/sepia` slash workflow：
+
+```bash
+# 安裝
+git clone https://github.com/Nanako0129/sepia.git ~/.sepia
+mkdir -p ~/.gemini/config/skills ~/.gemini/antigravity/global_workflows
+cp -R ~/.sepia/skills/sepia ~/.gemini/config/skills/sepia
+cp ~/.sepia/.agents/workflows/sepia.md ~/.gemini/antigravity/global_workflows/sepia.md
+
+# 更新
+git -C ~/.sepia pull
+rm -rf ~/.gemini/config/skills/sepia && cp -R ~/.sepia/skills/sepia ~/.gemini/config/skills/sepia
+cp ~/.sepia/.agents/workflows/sepia.md ~/.gemini/antigravity/global_workflows/sepia.md
+```
+
+### 四平台一次裝完（替代方案）
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Nanako0129/sepia/main/install.sh | bash
 ```
 
-這行會把 repo clone 到 `~/.sepia`（可用 `SEPIA_HOME` 覆寫）並以 user scope 安裝；重跑同一行就是更新。想先看內容再跑？自己 clone 下來，從 checkout 執行 `./install.sh`，結果相同。兩種方式裝出來都是：
+這行會把 repo clone 到 `~/.sepia`（可用 `SEPIA_HOME` 覆寫）並以 user scope 安裝四個平台；重跑同一行就是更新。想先看內容再跑？自己 clone 下來，從 checkout 執行 `./install.sh`。兩種方式裝出來都是：
 
 | 平台 | 位置 | 機制 |
 |---|---|---|
 | Claude Code | `~/.claude/skills/sepia` | symlink |
 | Codex | `~/.agents/skills/sepia` | symlink |
-| Grok Build | `~/.grok/skills/sepia`（原生路徑，不需要 Claude Code） | symlink |
+| Grok Build | `~/.grok/skills/sepia` | symlink |
 | Antigravity | `~/.gemini/config/skills/sepia` ＋ `/sepia` global workflow | copy |
 
-**Project scope（替代方案）：**當某個 repo 需要釘住自己的版本時，把 `skills/sepia/` commit 進該 repo 的 `.agents/skills/sepia`（Codex＋Antigravity）或 `.claude/skills/sepia`（Claude Code）。
+### Skills CLI（替代方案，77+ 個 agent）
+
+```bash
+npx skills add Nanako0129/sepia -g     # -g 才是 user scope；預設是 project
+npx skills update -g                   # 更新
+```
+
+### Project scope（替代方案）
+
+當某個 repo 需要釘住自己的版本時，把 `skills/sepia/` commit 進該 repo 的 `.agents/skills/sepia`（Codex＋Antigravity）或 `.claude/skills/sepia`（Claude Code）。
 
 ## 目錄結構
 
