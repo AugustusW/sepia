@@ -34,43 +34,88 @@ The governing principle throughout: **calibrate to the human distribution, don't
 
 ## Install
 
-Default is **user scope** — install once, and the skill follows you into every project. The CLI routes below are user-scope out of the box; the in-session `/plugin install` dialog instead asks you to pick a scope, so choose **User** there.
+Every platform has its own native install, each paired with its update commands. Default everywhere is **user scope** — install once, use it in every project.
 
-**Skills CLI (77+ agents, pick yours when prompted):**
-
-```bash
-npx skills add Nanako0129/sepia -g
-```
-
-`-g` is what makes it user scope (the default is project). Update later with `npx skills update -g`.
-
-**Claude Code plugin (Grok Build rides along):**
+### Claude Code
 
 ```bash
+# install
 claude plugin marketplace add Nanako0129/sepia
 claude plugin install sepia@sepia --scope user
+
+# update
+claude plugin marketplace update sepia
+claude plugin update sepia
 ```
 
-Grok Build auto-discovers Claude Code's plugins, so this install covers Grok users who also run Claude Code.
+The in-session `/plugin install` dialog asks you to pick a scope — choose **User** there.
 
-**Grok Build without Claude Code:** run `./install.sh` (links into Grok's native `~/.grok/skills/`), or add `Nanako0129/sepia` as a marketplace source in Grok's Marketplace tab — Grok consumes Claude Code marketplace repos directly.
+### Codex
 
-**All four platforms, one line:**
+```bash
+# install
+codex plugin marketplace add Nanako0129/sepia
+codex plugin add sepia@sepia
+
+# update — refresh the marketplace snapshot, then re-add to pick up the new version
+codex plugin marketplace upgrade sepia
+codex plugin add sepia@sepia
+```
+
+### Grok Build
+
+```bash
+# install
+grok plugin install Nanako0129/sepia --trust
+
+# update
+grok plugin update
+```
+
+Grok also auto-discovers a Claude Code install of sepia if you have one; either route works.
+
+### Antigravity
+
+No marketplace here — the native install is placing the skill folder, plus the `/sepia` slash workflow:
+
+```bash
+# install
+git clone https://github.com/Nanako0129/sepia.git ~/.sepia
+mkdir -p ~/.gemini/config/skills ~/.gemini/antigravity/global_workflows
+cp -R ~/.sepia/skills/sepia ~/.gemini/config/skills/sepia
+cp ~/.sepia/.agents/workflows/sepia.md ~/.gemini/antigravity/global_workflows/sepia.md
+
+# update
+git -C ~/.sepia pull
+rm -rf ~/.gemini/config/skills/sepia && cp -R ~/.sepia/skills/sepia ~/.gemini/config/skills/sepia
+cp ~/.sepia/.agents/workflows/sepia.md ~/.gemini/antigravity/global_workflows/sepia.md
+```
+
+### All four at once (alternative)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Nanako0129/sepia/main/install.sh | bash
 ```
 
-This clones the repo to `~/.sepia` (override with `SEPIA_HOME`) and installs at user scope; re-run the same line to update everything. Prefer to inspect first? Clone it yourself and run `./install.sh` from the checkout — same result. Either way it installs:
+Clones the repo to `~/.sepia` (override with `SEPIA_HOME`) and installs at user scope for all four platforms; re-running the same line is also the update. Prefer to inspect first? Clone it yourself and run `./install.sh` from the checkout. Either way it installs:
 
 | Platform | Where | Mechanism |
 |---|---|---|
 | Claude Code | `~/.claude/skills/sepia` | symlink |
 | Codex | `~/.agents/skills/sepia` | symlink |
-| Grok Build | `~/.grok/skills/sepia` (native path, no Claude Code needed) | symlink |
+| Grok Build | `~/.grok/skills/sepia` | symlink |
 | Antigravity | `~/.gemini/config/skills/sepia` + `/sepia` global workflow | copy |
 
-**Project scope (alternative):** when one repo should pin its own copy, commit `skills/sepia/` into that repo as `.agents/skills/sepia` (Codex + Antigravity) or `.claude/skills/sepia` (Claude Code).
+### Skills CLI (alternative, 77+ agents)
+
+```bash
+npx skills add Nanako0129/sepia -g     # -g = user scope; the default is project
+npx skills update -g                   # update
+```
+
+### Project scope (alternative)
+
+When one repo should pin its own copy, commit `skills/sepia/` into that repo as `.agents/skills/sepia` (Codex + Antigravity) or `.claude/skills/sepia` (Claude Code).
 
 ## Layout
 
