@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Installs the sepia skill for Claude Code, Codex, Grok Build, and Antigravity.
-# Claude Code / Codex / Grok follow symlinks; Antigravity gets a copy.
+# Installs the sepia skill at USER scope for Claude Code, Codex, Grok Build,
+# and Antigravity. Claude Code / Codex / Grok follow symlinks; Antigravity
+# gets a copy. For project-scope installs, see README.md.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -28,4 +29,12 @@ mkdir -p "$(dirname "$WF")"
 cp "$ROOT/.agents/workflows/sepia.md" "$WF"
 echo "copied  $WF"
 
-echo "done"
+echo ""
+echo "Installed at user scope:"
+echo "  Claude Code + Grok Build : ~/.claude/skills/sepia (symlink)"
+echo "  Codex                    : ~/.agents/skills/sepia (symlink)"
+echo "  Antigravity              : ~/.gemini/config/skills/sepia (copy) + /sepia workflow"
+echo ""
+echo "Keep this clone: the symlinks point into it. 'git pull' updates the"
+echo "symlinked installs; re-run install.sh after pulling to refresh the"
+echo "Antigravity copy."

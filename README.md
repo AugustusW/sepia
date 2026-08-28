@@ -32,12 +32,35 @@ The governing principle throughout: **calibrate to the human distribution, don't
 
 ## Install
 
-| Platform | How |
-|---|---|
-| Claude Code | `/plugin marketplace add Nanako0129/sepia` → `/plugin install sepia@sepia`, or `./install.sh` |
-| Codex | `./install.sh` (links into `~/.agents/skills/`), or drop `skills/sepia/` into your repo's `.agents/skills/` |
-| Grok Build | Nothing extra; it auto-discovers Claude Code's skills and plugins, so `./install.sh` covers it |
-| Antigravity | `./install.sh` (copies into `~/.gemini/config/skills/`) |
+Default is **user scope** — install once, and the skill follows you into every project.
+
+**Claude Code (Grok Build rides along):**
+
+```text
+/plugin marketplace add Nanako0129/sepia
+/plugin install sepia@sepia
+```
+
+Grok Build auto-discovers Claude Code's plugins; nothing more to do there.
+
+**All four platforms at once:**
+
+```bash
+git clone https://github.com/Nanako0129/sepia.git ~/.sepia
+~/.sepia/install.sh
+```
+
+`install.sh` installs at user scope only:
+
+| Platform | Where | Mechanism |
+|---|---|---|
+| Claude Code + Grok Build | `~/.claude/skills/sepia` | symlink |
+| Codex | `~/.agents/skills/sepia` | symlink |
+| Antigravity | `~/.gemini/config/skills/sepia` + `/sepia` global workflow | copy |
+
+Keep the clone — the symlinks point into it. `git pull` updates Claude Code, Grok, and Codex in place; re-run `install.sh` after pulling to refresh the Antigravity copy.
+
+**Project scope (alternative):** when one repo should pin its own copy, commit `skills/sepia/` into that repo as `.agents/skills/sepia` (Codex + Antigravity) or `.claude/skills/sepia` (Claude Code).
 
 ## Layout
 
