@@ -25,8 +25,7 @@ repo/
 ├── .claude-plugin/plugin.json + marketplace.json
 ├── .codex-plugin/plugin.json              # "skills": "./skills/"
 ├── .agents/workflows/<name>.md            # （可選）Antigravity slash 包裝
-├── install.sh                             # symlink 到各平台目錄
-└── README.md
+└── README.md                              # native host installers + manual Antigravity copy
 ```
 - Claude Code plugin 的 skills 預設路徑就是 `./skills/` → 零設定
 - Grok 免安裝（自動發現 Claude 的安裝結果）
