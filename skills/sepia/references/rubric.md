@@ -72,7 +72,7 @@ Use the Human and AI columns as corpus calibration references, not targets for a
 | Anachrony intensity | Scene-level flashbacks/flash-forwards as structure | ~2.6 | 2.3 |
 | Nonlinear framing for disclosure | Time devices used to stage revelations | ~2.0 | 1.7 |
 | Recontextualization after surprise | How much earlier text a reveal recolors | ~3.3 | 3.0 |
-| Location variety *(advisory signal)* | Flag when a 3,000+ word story never leaves one locale without the premise demanding confinement | 2+ full-scene locales common | single-location bias |
+| Location variety *(Sepia heuristic advisory)* | Optional editorial check: flag a 3,000+ word story that never leaves one locale unless the premise demands confinement | measured ordinal mean 1.34 | 1.08 |
 | Dialogue proportion | Fraction of text in quoted speech (1 = none, 3 = balanced, 5 = dominates) | ~3.0 | 2.7 |
 | Moral polarity toward protagonist | Narrative's final stance; flag a clearly affirmative or clearly condemning stance as an AI-leaning signal | ambivalent ~59% | clear 62% |
 
