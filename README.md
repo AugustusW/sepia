@@ -34,7 +34,7 @@ The governing principle throughout: **calibrate to the human distribution, don't
 
 ## Install
 
-Every platform has its own native install, each paired with its update commands. Default everywhere is **user scope** — install once, use it in every project.
+Claude Code, Codex, and Grok Build use their native plugin installers. Antigravity uses the manual path below. Every install defaults to **user scope** — install once, use it in every project.
 
 ### Claude Code
 
@@ -76,35 +76,28 @@ Grok also auto-discovers a Claude Code install of sepia if you have one; either 
 
 ### Antigravity
 
-No marketplace here — the native install is placing the skill folder, plus the `/sepia` slash workflow:
+Antigravity has no marketplace. This fresh install is pinned to the current release, `v0.2.0`, and aborts if either destination already exists:
 
 ```bash
-# install
-git clone https://github.com/Nanako0129/sepia.git ~/.sepia
-mkdir -p ~/.gemini/config/skills ~/.gemini/antigravity/global_workflows
-cp -R ~/.sepia/skills/sepia ~/.gemini/config/skills/sepia
-cp ~/.sepia/.agents/workflows/sepia.md ~/.gemini/antigravity/global_workflows/sepia.md
+(
+  set -e
 
-# update
-git -C ~/.sepia pull
-rm -rf ~/.gemini/config/skills/sepia && cp -R ~/.sepia/skills/sepia ~/.gemini/config/skills/sepia
-cp ~/.sepia/.agents/workflows/sepia.md ~/.gemini/antigravity/global_workflows/sepia.md
+  skill="$HOME/.gemini/config/skills/sepia"
+  workflow="$HOME/.gemini/antigravity/global_workflows/sepia.md"
+
+  if [ -e "$skill" ] || [ -L "$skill" ] || [ -e "$workflow" ] || [ -L "$workflow" ]; then
+    echo "Antigravity install aborted: move the existing skill and workflow aside first." >&2
+    exit 1
+  fi
+
+  git clone --branch v0.2.0 --depth 1 https://github.com/Nanako0129/sepia.git "$HOME/.sepia"
+  mkdir -p "$HOME/.gemini/config/skills" "$HOME/.gemini/antigravity/global_workflows"
+  cp -R "$HOME/.sepia/skills/sepia" "$skill"
+  cp "$HOME/.sepia/.agents/workflows/sepia.md" "$workflow"
+)
 ```
 
-### All four at once (alternative)
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Nanako0129/sepia/main/install.sh | bash
-```
-
-Clones the repo to `~/.sepia` (override with `SEPIA_HOME`) and installs at user scope for all four platforms; re-running the same line is also the update. Prefer to inspect first? Clone it yourself and run `./install.sh` from the checkout. Either way it installs:
-
-| Platform | Where | Mechanism |
-|---|---|---|
-| Claude Code | `~/.claude/skills/sepia` | symlink |
-| Codex | `~/.agents/skills/sepia` | symlink |
-| Grok Build | `~/.grok/skills/sepia` | symlink |
-| Antigravity | `~/.gemini/config/skills/sepia` + `/sepia` global workflow | copy |
+Antigravity has no automated updater. To update or roll back, inspect the release you want, move the current clone, skill, and workflow aside under backup names you choose, then repeat this fresh install with that release tag.
 
 ### Skills CLI (alternative, 77+ agents)
 
@@ -116,6 +109,50 @@ npx skills update -g                   # update
 ### Project scope (alternative)
 
 When one repo should pin its own copy, commit `skills/sepia/` into that repo as `.agents/skills/sepia` (Codex + Antigravity) or `.claude/skills/sepia` (Claude Code).
+
+## Uninstall
+
+Claude Code, Codex, and Grok Build each use their native command:
+
+```bash
+# Claude Code
+claude plugin uninstall sepia@sepia --scope user
+
+# Codex
+codex plugin remove sepia@sepia
+
+# Grok Build
+grok plugin uninstall sepia
+```
+
+For Antigravity, disable both entries by renaming them. The preflight stops before either move if a source is missing or a `.disabled` target already exists:
+
+```bash
+(
+  set -e
+
+  skill="$HOME/.gemini/config/skills/sepia"
+  workflow="$HOME/.gemini/antigravity/global_workflows/sepia.md"
+
+  if [ ! -e "$skill" ] && [ ! -L "$skill" ]; then
+    echo "Antigravity disable aborted: skill not found." >&2
+    exit 1
+  fi
+  if [ ! -e "$workflow" ] && [ ! -L "$workflow" ]; then
+    echo "Antigravity disable aborted: workflow not found." >&2
+    exit 1
+  fi
+  if [ -e "$skill.disabled" ] || [ -L "$skill.disabled" ] || [ -e "$workflow.disabled" ] || [ -L "$workflow.disabled" ]; then
+    echo "Antigravity disable aborted: a .disabled target already exists." >&2
+    exit 1
+  fi
+
+  mv "$skill" "$skill.disabled"
+  mv "$workflow" "$workflow.disabled"
+)
+```
+
+This leaves `~/.sepia` in place for inspection. Deleting it is a separate manual decision.
 
 ## Layout
 
@@ -134,7 +171,6 @@ sepia/
 ├── .claude-plugin/          # Claude Code packaging (plugin.json, marketplace.json)
 ├── .codex-plugin/           # Codex packaging
 ├── .agents/                 # Codex/Antigravity workspace-mode discovery + Antigravity workflow
-├── install.sh
 └── research/                # digested evidence base with sources
 ```
 

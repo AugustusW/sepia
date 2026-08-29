@@ -34,7 +34,7 @@ sepia 把這些實測差距，連同 [`research/`](research/) 裡整理過的十
 
 ## 安裝
 
-每個平台都有原生安裝方式，也各自附上更新指令。全部預設採用 **user scope**：安裝一次，每個專案都能用。
+Claude Code、Codex 與 Grok Build 使用各自的原生 plugin installer；Antigravity 依照下方的手動流程。全部預設採用 **user scope**：安裝一次，每個專案都能用。
 
 ### Claude Code
 
@@ -76,35 +76,28 @@ Grok 也會自動找到既有的 Claude Code sepia 安裝；兩種方式都能�
 
 ### Antigravity
 
-Antigravity 沒有 marketplace；原生安裝方式是放入 Agent Skill 資料夾，再加上 `/sepia` slash workflow：
+Antigravity 沒有 marketplace。以下全新安裝固定使用目前的 `v0.2.0` release；任一目的地已存在就會中止：
 
 ```bash
-# install
-git clone https://github.com/Nanako0129/sepia.git ~/.sepia
-mkdir -p ~/.gemini/config/skills ~/.gemini/antigravity/global_workflows
-cp -R ~/.sepia/skills/sepia ~/.gemini/config/skills/sepia
-cp ~/.sepia/.agents/workflows/sepia.md ~/.gemini/antigravity/global_workflows/sepia.md
+(
+  set -e
 
-# update
-git -C ~/.sepia pull
-rm -rf ~/.gemini/config/skills/sepia && cp -R ~/.sepia/skills/sepia ~/.gemini/config/skills/sepia
-cp ~/.sepia/.agents/workflows/sepia.md ~/.gemini/antigravity/global_workflows/sepia.md
+  skill="$HOME/.gemini/config/skills/sepia"
+  workflow="$HOME/.gemini/antigravity/global_workflows/sepia.md"
+
+  if [ -e "$skill" ] || [ -L "$skill" ] || [ -e "$workflow" ] || [ -L "$workflow" ]; then
+    echo "Antigravity install aborted: move the existing skill and workflow aside first." >&2
+    exit 1
+  fi
+
+  git clone --branch v0.2.0 --depth 1 https://github.com/Nanako0129/sepia.git "$HOME/.sepia"
+  mkdir -p "$HOME/.gemini/config/skills" "$HOME/.gemini/antigravity/global_workflows"
+  cp -R "$HOME/.sepia/skills/sepia" "$skill"
+  cp "$HOME/.sepia/.agents/workflows/sepia.md" "$workflow"
+)
 ```
 
-### 四個平台一次裝完（替代方案）
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Nanako0129/sepia/main/install.sh | bash
-```
-
-這會把 repo clone 到 `~/.sepia`（可用 `SEPIA_HOME` 覆寫），並以 user scope 安裝到四個平台；重跑同一行就是更新。想先檢查內容？可自行 clone，從 checkout 執行 `./install.sh`。兩種方式都會安裝到：
-
-| 平台 | 位置 | 機制 |
-|---|---|---|
-| Claude Code | `~/.claude/skills/sepia` | symlink |
-| Codex | `~/.agents/skills/sepia` | symlink |
-| Grok Build | `~/.grok/skills/sepia` | symlink |
-| Antigravity | `~/.gemini/config/skills/sepia` ＋ `/sepia` global workflow | copy |
+Antigravity 沒有自動更新程式。要更新或回復舊版，先檢查想使用的 release，把目前的 clone、skill 與 workflow 移到自行命名的備份路徑，再用該 release tag 重做全新安裝。
 
 ### Skills CLI（替代方案，77+ 個 agent）
 
@@ -116,6 +109,50 @@ npx skills update -g                   # update
 ### Project scope（替代方案）
 
 某個 repo 要固定自己的版本時，把 `skills/sepia/` commit 到該 repo，放在 `.agents/skills/sepia`（Codex＋Antigravity）或 `.claude/skills/sepia`（Claude Code）。
+
+## 解除安裝
+
+Claude Code、Codex 與 Grok Build 各自使用原生指令：
+
+```bash
+# Claude Code
+claude plugin uninstall sepia@sepia --scope user
+
+# Codex
+codex plugin remove sepia@sepia
+
+# Grok Build
+grok plugin uninstall sepia
+```
+
+Antigravity 透過重新命名停用 skill 與 workflow，之後仍可復原。如果來源缺少，或任一 `.disabled` 目的地已存在，預先檢查會在移動前中止：
+
+```bash
+(
+  set -e
+
+  skill="$HOME/.gemini/config/skills/sepia"
+  workflow="$HOME/.gemini/antigravity/global_workflows/sepia.md"
+
+  if [ ! -e "$skill" ] && [ ! -L "$skill" ]; then
+    echo "Antigravity disable aborted: skill not found." >&2
+    exit 1
+  fi
+  if [ ! -e "$workflow" ] && [ ! -L "$workflow" ]; then
+    echo "Antigravity disable aborted: workflow not found." >&2
+    exit 1
+  fi
+  if [ -e "$skill.disabled" ] || [ -L "$skill.disabled" ] || [ -e "$workflow.disabled" ] || [ -L "$workflow.disabled" ]; then
+    echo "Antigravity disable aborted: a .disabled target already exists." >&2
+    exit 1
+  fi
+
+  mv "$skill" "$skill.disabled"
+  mv "$workflow" "$workflow.disabled"
+)
+```
+
+這些指令會保留 `~/.sepia` 供檢查。是否刪除該 clone，請另行手動決定。
 
 ## 目錄結構
 
@@ -134,7 +171,6 @@ sepia/
 ├── .claude-plugin/          # Claude Code packaging (plugin.json, marketplace.json)
 ├── .codex-plugin/           # Codex packaging
 ├── .agents/                 # Codex/Antigravity workspace-mode discovery + Antigravity workflow
-├── install.sh
 └── research/                # digested evidence base with sources
 ```
 
