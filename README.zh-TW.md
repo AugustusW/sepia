@@ -6,6 +6,21 @@
 
 這是一套可攜的 [Agent Skill](https://agentskills.io/specification)，支援 Claude Code、Codex、Grok Build 與 Antigravity。全平台共用唯一一份正典 `SKILL.md`，不另開平台分支。四種操作：**write**、**review**（只診斷）、**refactor**（最小修改）、**recreate**（整篇重寫）。
 
+## 操作入口
+
+完整 plugin package 會在 Claude Code、Codex 與 Grok Build 提供一個通用 router，以及四個可直接呼叫的操作入口：
+
+| 操作 | Claude Code | Codex | Grok Build | 用途 |
+|---|---|---|---|---|
+| write | `/sepia-write` | `$sepia-write` | `/sepia-write` | 撰寫新內容 |
+| review | `/sepia-review` | `$sepia-review` | `/sepia-review` | 只診斷，不修改 |
+| refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | 在原文上做最小修改 |
+| recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | 依原始事實與意圖重新撰寫 |
+
+通用 router 仍可透過 `/sepia`（Claude Code、Grok Build）或 `$sepia`（Codex）使用。操作 wrapper 依賴同一套 package 裡的正典 skill，不支援單獨安裝；請安裝完整 plugin package。這張表只記錄 package 語法，不表示這份尚未發版的 checkout 已完成安裝或 runtime 測試。
+
+Antigravity 固定使用 `v0.2.0` 的手動安裝流程，本次維持不變，呼叫方式仍是 `/sepia <operation>`。這個 slice 不為 Antigravity 新增獨立操作入口。
+
 ## 為什麼還需要另一個 humanizer
 
 常見的 humanizer 都在改用詞與句法。[StoryScope](https://arxiv.org/abs/2604.03136)（Russell et al., 2026：61,608 篇故事，涵蓋人類與 5 個頂尖 LLM）顯示，只靠**敘事結構特徵**的分類器就能以 93.2% macro-F1 偵測 AI 小說；把字句風格修掉，分類表現也只從 95.5% 降到 93.9%。留下的破綻都在架構層：敘事者直接講明主題、單線且因果收得過於工整的情節、情緒只靠身體感受呈現、沒有真實世界的參照、讀者缺席、時間全程線性，以及靠主角成長與接納收束的結局。
@@ -158,16 +173,14 @@ Antigravity 透過重新命名停用 skill 與 workflow，之後仍可復原。�
 
 ```text
 sepia/
-├── skills/sepia/            # canonical skill (Agent Skills standard)
-│   ├── SKILL.md             # routing, operations, calibration rules, guardrails
-│   └── references/
-│       ├── narrative-pass.md      # fiction pass 1: architecture (the differentiator)
-│       ├── discourse-pass.md      # pass 2: paragraph-level flow
-│       ├── style-pass.md          # pass 3: surface style
-│       ├── rubric.md              # fiction 30-feature diagnosis
-│       ├── model-fingerprints.md  # per-model corrections
-│       ├── professional-pass.md   # shared non-fiction layer (slop checklist, venue matching)
-│       └── domains/               # release-notes, dev-replies, postmortems, tickets, tech-articles
+├── skills/
+│   ├── sepia/                # 正典 skill（Agent Skills standard）
+│   │   ├── SKILL.md          # routing、operations、calibration rules、guardrails
+│   │   └── references/       # passes、rubric、fingerprints 與 domain rules
+│   ├── sepia-write/SKILL.md  # 固定單一操作的薄 wrapper
+│   ├── sepia-review/SKILL.md
+│   ├── sepia-refactor/SKILL.md
+│   └── sepia-recreate/SKILL.md
 ├── .claude-plugin/          # Claude Code packaging (plugin.json, marketplace.json)
 ├── .codex-plugin/           # Codex packaging
 ├── .agents/                 # Codex/Antigravity workspace-mode discovery + Antigravity workflow

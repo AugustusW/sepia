@@ -1,7 +1,7 @@
 {
   "name": "sepia",
   "version": "0.2.0",
-  "description": "De-AI writing: make AI-generated text read as human-written. Narrative-architecture repair for fiction (StoryScope, arXiv:2604.03136) plus domain modes for release notes, PR/issue replies, postmortems, tickets, and technical articles. Operations: write, review, refactor, recreate.",
+  "description": "De-AI writing package with the general Sepia router plus four separate operation entries: write, review, refactor, and recreate.",
   "author": {
     "name": "Nanako Tsai"
   },

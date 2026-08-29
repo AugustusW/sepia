@@ -6,6 +6,21 @@
 
 A portable [Agent Skill](https://agentskills.io/specification) for Claude Code, Codex, Grok Build, and Antigravity. One canonical `SKILL.md`, no per-platform forks. Four operations: **write**, **review** (diagnose only), **refactor** (minimal edits), **recreate** (full rewrite).
 
+## Operation entries
+
+The complete plugin package gives Claude Code, Codex, and Grok Build a general router plus four direct operation entries:
+
+| Operation | Claude Code | Codex | Grok Build | Meaning |
+|---|---|---|---|---|
+| write | `/sepia-write` | `$sepia-write` | `/sepia-write` | Create new prose |
+| review | `/sepia-review` | `$sepia-review` | `/sepia-review` | Diagnose without editing |
+| refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | Make minimal in-place edits |
+| recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | Rewrite from the source facts and intent |
+
+The general `/sepia` (Claude Code and Grok Build) or `$sepia` (Codex) router remains available. The operation wrappers depend on their sibling canonical skill, so standalone wrapper installation is unsupported; install the complete plugin package. This table documents package syntax, not a claim that this unreleased checkout was installed or runtime-tested.
+
+Antigravity's pinned `v0.2.0` manual installer remains unchanged and continues to use `/sepia <operation>`. This slice does not add separate Antigravity operation entries.
+
 ## Why another humanizer
 
 Every popular humanizer edits word choice and syntax. [StoryScope](https://arxiv.org/abs/2604.03136) (Russell et al., 2026: 61,608 stories, human + 5 frontier LLMs) showed that a classifier using **narrative-structure features alone** detects AI fiction at 93.2% macro-F1, and that editing the surface style away barely moves it (95.5% → 93.9%). The tells that survive are architectural: themes explained by the narrator, single-track causally-tidy plots, emotions rendered only as bodily sensation, no real-world references, no reader, linear time, endings resolved by protagonist growth and acceptance.
@@ -158,16 +173,14 @@ This leaves `~/.sepia` in place for inspection. Deleting it is a separate manual
 
 ```text
 sepia/
-├── skills/sepia/            # canonical skill (Agent Skills standard)
-│   ├── SKILL.md             # routing, operations, calibration rules, guardrails
-│   └── references/
-│       ├── narrative-pass.md      # fiction pass 1: architecture (the differentiator)
-│       ├── discourse-pass.md      # pass 2: paragraph-level flow
-│       ├── style-pass.md          # pass 3: surface style
-│       ├── rubric.md              # fiction 30-feature diagnosis
-│       ├── model-fingerprints.md  # per-model corrections
-│       ├── professional-pass.md   # shared non-fiction layer (slop checklist, venue matching)
-│       └── domains/               # release-notes, dev-replies, postmortems, tickets, tech-articles
+├── skills/
+│   ├── sepia/                # canonical skill (Agent Skills standard)
+│   │   ├── SKILL.md          # routing, operations, calibration rules, guardrails
+│   │   └── references/       # passes, rubric, fingerprints, and domain rules
+│   ├── sepia-write/SKILL.md  # thin fixed-operation wrappers
+│   ├── sepia-review/SKILL.md
+│   ├── sepia-refactor/SKILL.md
+│   └── sepia-recreate/SKILL.md
 ├── .claude-plugin/          # Claude Code packaging (plugin.json, marketplace.json)
 ├── .codex-plugin/           # Codex packaging
 ├── .agents/                 # Codex/Antigravity workspace-mode discovery + Antigravity workflow
