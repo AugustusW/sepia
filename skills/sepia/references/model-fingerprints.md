@@ -1,6 +1,6 @@
 # Per-model fingerprints
 
-Each frontier model diverges from the *other AIs* on its own signature features (StoryScope §5, Table 16; 6-way attribution 68.4% macro-F1 from narrative features alone). When you know which model wrote — or is writing — the text, push against its specific defaults **in addition to** the shared corrections in the three passes. These are tendencies measured on specific model versions (Sonnet 4.6, GPT-5.4, Gemini 3 Flash, DeepSeek V3.2, Kimi K2.5, 2026); treat them as priors to verify against the draft, not certainties.
+Each frontier model diverges from the *other AIs* on its own signature features (StoryScope §5, Table 17; 6-way attribution 68.4% macro-F1 from narrative features alone). See [StoryScope arXiv v6](https://arxiv.org/abs/2604.03136v6) for the pinned study; stable source identities live in the repository research ledger, and single-letter aliases in this file are file-local. When you know which model wrote — or is writing — the text, push against its specific defaults **in addition to** the shared corrections in the three passes. These are tendencies measured on specific model versions (Sonnet 4.6, GPT-5.4, Gemini 3 Flash, DeepSeek V3.2, Kimi K2.5, 2026); treat them as priors to verify against the draft, not certainties. Corrections below are Sepia inferences unless a source explicitly tested the intervention.
 
 ## Claude — the most identifiable AI (26 fingerprint features)
 

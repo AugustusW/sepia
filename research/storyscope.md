@@ -1,11 +1,11 @@
 # StoryScope 研究摘要（skill 設計的 evidence base）
 
-> 來源：Russell, Rajendhran, Pham, Iyyer, Wieting (2026)。*StoryScope: Investigating idiosyncrasies in AI fiction*。arXiv:2604.03136v3（2026-04-08）。UMD + Google DeepMind。
+> 來源：Jenna Russell、Rishanth Rajendhran、Chau Minh Pham、Mohit Iyyer、John Wieting (2026)。*StoryScope: Investigating idiosyncrasies in AI fiction*。arXiv:2604.03136v6（2026-08-10 修訂）。UMD + Google DeepMind。完整來源 metadata 見 [sources.md](sources.md)。
 > Code/data: https://github.com/jenna-russell/storyscope （taxonomy.json = 304 features 完整定義）
 
 ## 一句話結論
 
-AI 小說即使把表面風格（em-dash、"delve"、詞彙）洗掉，**敘事結構層的選擇**仍可被偵測（narrative features alone: 93.2% macro-F1；LAMP 風格改寫後仍 93.9%）。所以「去 AI 味」skill 必須先改敘事架構、再改表面風格，順序不可反。
+AI 小說即使把表面風格（em-dash、"delve"、詞彙）洗掉，**敘事結構層的選擇**仍可被偵測（narrative features alone: 93.2% macro-F1；在所研究的 LAMP 編輯條件與樣本中，風格改寫後仍 93.9%）。這支持 Sepia 將敘事架構置前的設計推論；StoryScope 沒有測試「先改敘事架構、再改表面風格」的介入順序。
 
 ## 方法（可信度依據）
 
@@ -14,9 +14,10 @@ AI 小說即使把表面風格（em-dash、"delve"、詞彙）洗掉，**敘事�
 - 特徵標註 reliability：Krippendorff's α=0.90；human–model Cohen's κ=0.84（高於 human–human 0.74）。
 - 長度、主題、記憶污染都做過 ablation，結論不變。
 - 二元偵測 93.2%（narrative only）/ 96.0%（+style）；6-way 歸屬 68.4% / 77.3%。
+- Core Only：以 30 個 core features 訓練的 XGBoost held-out classifier，84.8% macro-F1、AUPRC .828；這是分類器成績，不是人工 rubric 的效能。
 - 人類故事在敘事特徵空間更「稀有」且更分散：rarity percentile 0.71 vs 0.49（Cohen's d=0.83）；human–AI centroid 距離是 AI–AI 的 1.6 倍；24.7% 人類故事落在最稀有的 10%。
 
-## 30 個 core features（Table 15，含數值）
+## 30 個 core features（Table 16，含數值）
 
 ### AI 偏高（要壓低）——主題過度決定 Thematic over-determination
 | Feature | Human | AI | 說明 |
@@ -87,7 +88,7 @@ AI 小說即使把表面風格（em-dash、"delve"、詞彙）洗掉，**敘事�
 4. **Human authors engage the outside world**：人類點名真實文本/作者的比率近 2 倍（47% vs 24%）；AI 迴避真實品牌、地名、作品；人類承認讀者存在（aside to "you, dear reader"），「AI writes as though no one is watching」。
 5. **AI writing has less diverse narrative features**：人類用更多地點、更多對話、支線與主題交織（42% vs 21%）、道德立場曖昧的主角（59% vs 38%）。
 
-## 各模型指紋（Table 16 + §5，供 model-specific 校正）
+## 各模型指紋（Table 17 + §5，供 model-specific 校正）
 
 - **Claude**（最容易辨識，26 個指紋）：事件強度攀升最平（flat escalation）、事件類型多樣性特徵強、敘事聲音最均勻；奉行「reverent/continuist」文學傳統（62% vs 39–56%）；愛 epilogue/flash-forward 結尾；避免夢境；setting mood 傾向 uncanny/haunted；偏好安靜結局而非 avalanche endings。
 - **GPT**：gossip/rumor 作為情節機制（64% vs 44–55%）；愛用「多年/數十年後回望」的遠距回顧敘事者；比其他 AI 更愛顛覆期待（41%）；和解結局曖昧；ensemble 社會網絡達到人類水準。
@@ -99,15 +100,17 @@ AI 小說即使把表面風格（em-dash、"delve"、詞彙）洗掉，**敘事�
 ## 其他要點
 
 - Style 特徵的界線（App. B）：sentence/phrase-level texture = style；events, causality, closure, character roles, relationship topology, setting, temporal arrangement = narrative。跳過 style 仍偵測得到，反之 style-only 只有 85.8%。
-- LAMP（Chakrabarty 2025）的 7 類 artifact 改寫（cliché、redundant exposition、purple prose…）只降 1.6 個百分點 → 表面修補救不了結構。
-- Chakrabarty et al. 2026：在文學語料上微調可把 AI 偵測率從 97% 打到 3% → 風格可以學走，結構仍需明確指令。
+- LAMP（Chakrabarty 2025）的 7 類 artifact 改寫在所研究的編輯樣本中，narrative classifier 仍維持高辨識表現；相較基準僅降 1.6 個百分點。
+- Chakrabarty et al. 2026：在該研究的文學模仿實驗中，微調後 detector classification rate 從 97% 降到 3%；該 Readers study 測量風格與品質偏好，沒有測試敘事結構介入。
 - 人類故事比 AI 長（median 4,973 vs 3,355 字），但偵測結果與長度無關（length-matched 後不變）。
 
-## 對 skill 的結構性啟示
+## 對 skill 的結構性啟示（Sepia 設計推論）
 
-1. 兩層架構：**Pass 1 敘事架構**（30 core features 反向操作）→ **Pass 2 表面風格**（LAMP/slop 類規則）。順序固定。
-2. 30 core features 可直接轉成「生成前的設計指令」與「生成後的自我評分 rubric」（taxonomy.json 的 detection_method 就是現成的評分說明）。
-3. 注意「不是全部反轉」：人類均值大多是「中間值」而非另一個極端（如 Thematic Explicitness 人類 3.28 非 1.0；Chronological Discontinuity 2.40 非 5.0）。目標是**校準到人類分布**，不是矯枉過正。skill 必須明示每個軸的目標區間。
-4. 多樣性本身是特徵：人類作品彼此更不像。skill 應該引入隨機性/選擇性（每篇只挑部分手法，避免產生新的「humanizer 指紋」）。
-5. Model-specific 校正表：偵測目前使用的模型，套用該模型的指紋反制（如在 Claude 上：拉高事件強度曲線的落差、禁 epilogue、允許 avalanche ending）。
-6. 人類指紋可直接當配方：in-dialogue 登場、back-loaded revelation、跨文類、真實世界專名、對讀者說話。
+以下是 Sepia 根據上述研究觀察提出的設計推論，不是 StoryScope 已測試的介入；除非另有明載，recipe 與 ordering 都不能解讀為效果證據。
+
+1. Sepia 將兩層架構排成 **Pass 1 敘事架構**（30 core features 的觀察）→ **Pass 2 表面風格**（LAMP/slop 類規則）；這個順序未在 StoryScope 中作為介入比較。
+2. Sepia 將 30 core features 的 `detection_method` 用作生成前設計與生成後人工檢查的素材；這不等於已驗證的自我評分 detector。
+3. Sepia 把人類均值視為校準參考而非反轉目標：Thematic Explicitness 人類 3.28 非 1.0，Chronological Discontinuity 2.40 非 5.0；任何目標區間都是 editorial heuristic。
+4. Sepia 以選擇性取用手法回應人類作品的多樣性：每篇只挑部分手法，避免形成新的 humanizer 指紋；此做法未由研究直接測試。
+5. Sepia 將 model-specific 表格作為可能的校正提示，例如 Claude 的事件強度曲線與結尾習慣；這是 inference，不是介入效果。
+6. Sepia 將人類偏高的特徵當作可選 recipe：in-dialogue 登場、back-loaded revelation、跨文類、真實世界專名、對讀者說話；研究數據本身不保證採用 recipe 會改善文字。

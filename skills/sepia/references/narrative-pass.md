@@ -1,8 +1,8 @@
 # Pass 1 — Narrative architecture
 
-Seven decision groups. Each lists the measured human-vs-AI gap, what to do when **generating**, and what to check when **revising**. Numbers are from StoryScope (S), Beguš 2024 (B), Xu et al. PNAS 2025 (X), Nonaka & Perry 2025 (N), and QUDsim (Q); percentages read *human vs AI*.
+Seven decision groups. Each lists the measured human-vs-AI gap, what to do when **generating**, and what to check when **revising**. Numbers are from StoryScope (S), Beguš 2024 (B), Xu et al. PNAS 2025 (X), Nonaka & Perry 2025 (N), and QUDsim (Q); percentages read *human vs AI*. Stable source identities live in the repository research ledger; single-letter aliases in this file are file-local. Generate/Revise prescriptions are Sepia design inferences unless a cited source explicitly tested the intervention.
 
-Work through all seven groups when filling the architecture sheet, but **enact only 3–5 human-leaning moves per story** (see SKILL.md Calibration). The groups marked ⚑ are zero-covered by every existing humanizer tool — they carry the most signal per unit of effort.
+Work through all seven groups when filling the architecture sheet, but **enact only 3–5 human-leaning moves per story** (see SKILL.md Calibration). The groups marked ⚑ were absent from the tools sampled in the repository's 2026-08-27 ecosystem snapshot; treat that as a bounded product observation, not proof of universal zero coverage.
 
 ## Architecture sheet template
 
@@ -37,7 +37,7 @@ Fill this before drafting (Workflow A) or as the diagnosis summary (Workflow B):
 
 **Revise:** Search the last three paragraphs and any narrator generalization ("That is how people are", "It was then she learned…", "In the end, what mattered was…") — cut or convert to a concrete action or image. Where dialogue debates ideas, rewrite so the disagreement is about something specific the characters want. If a symbol is explained in-text, delete the explanation and keep the symbol.
 
-> The moralizing final line is the single most reliable AI ending (B: "love knows no boundaries" appears as a matter of routine). An ending that just stops is human; an ending that concludes is machine.
+> Beguš reports recurring moralizing final lines such as "love knows no boundaries" in the tested model stories. Treat that pattern as a candidate signal, not evidence that a conclusive ending is necessarily machine-written.
 
 ## 2 ⚑ Plot: loosen the single track
 

@@ -2,6 +2,8 @@
 
 （由背景研究 agent 產出，2026-08-27）
 
+來源 metadata 見 [sources.md](sources.md)。下文的研究結果受各自樣本限制；「規則」與操作建議是 Sepia 推論，除非明載來源測試了該介入。
+
 ## 1. NarraBench（Hamilton, Wilkens & Piper 2025, arXiv 2510.09869）
 
 理論根基：Genette 敘事三角（story/discourse/narration）＋ Herman situatedness。
@@ -52,11 +54,11 @@ QUD＝每段所回答的隱含問題；LLM 的 QUD 序列模板化。
 
 ## 6. Chakrabarty, Ginsburg & Dhillon 2026（arXiv 2510.13939）
 
-模仿 50 名家、MFA vs in-context LLM vs 微調 GPT-4o；Pangram 偵測 97%→3%。
-- cliché 密度是主要中介變數（16.4% → 1.3%）
+模仿 50 名家、MFA vs in-context LLM vs 微調 GPT-4o；Pangram classification rate 97%→3%。
+- cliché 密度在該實驗的 mediation 分析中由 16.4% 降至 1.3%；這是實驗特定估計，1.3% 的信賴區間包含 0。
 - 微調消除：purple prose、過度雕琢比喻、「polite, predictable, inoffensive, upbeat」聲音、多餘 exposition／說教、公式化結構
 - MFA 讀者風格忠實度 odds ratio 0.16 → 8.16（翻轉）
-- AI 味的懲罰主要來自訓練有素的讀者；一般讀者測不出
+- 一般讀者盲測的風格忠實度偏好不顯著（OR 1.06），品質偏好反而偏向 AI 版本（OR 1.82）；這是偏好結果，不是一般讀者 AI 偵測能力的測試，研究也未顯示他們會因文字可被偵測而懲罰它。
 規則優先序：先殺 cliché → 過度比喻 → 說教；允許敘事者粗魯、偏頗、不討喜；驗收用「訓練有素讀者」視角。
 
 ## 7. Nonaka & Perry 2025（arXiv 2510.18932）
