@@ -2,7 +2,7 @@
 
 The 30 narrative features below come from StoryScope's released taxonomy and corpus summary (AI-core and human-core tables 14–15; all-30 means and gaps, Table 16). StoryScope's Core Only 30-feature XGBoost held-out classifier reached 84.8% macro-F1 (AUPRC .828); this manual rubric is heuristic triage, not that classifier or an authorship detector. See [StoryScope arXiv v6](https://arxiv.org/abs/2604.03136v6) for the pinned study.
 
-Use the Human and AI columns as corpus calibration references, not targets for an individual story. Observed signals are not authorship probabilities. This rubric makes no validated aggregate-detector or revision-threshold claim; PF-3 owns evaluation of any such claim.
+Use the Human and AI columns as corpus calibration references, not targets for an individual story. Observed signals are not authorship probabilities. This rubric makes no validated aggregate-detector or revision-threshold claim; any future aggregate claim requires a separate, documented evaluation.
 
 ## Protocol
 
