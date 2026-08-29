@@ -4,12 +4,21 @@
   <!-- Source: GitHub REST API /repos/Nanako0129/sepia/stargazers, application/vnd.github.star+json. Aggregation: hourly cumulative counts. No user identities retained. -->
   <style>
     .title { fill: #8a5738; font: 600 20px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    .subtitle, .label { fill: #6e7681; font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    .grid { stroke: #8c959f; stroke-opacity: .35; stroke-width: 1; }
-    .axis { stroke: #6e7681; stroke-width: 1.25; }
+    .subtitle, .label { fill: #57606a; font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .grid { stroke: #d0d7de; stroke-width: 1; }
+    .axis { stroke: #8c959f; stroke-width: 1.25; }
     .area { fill: #c69069; fill-opacity: .18; }
     .trend { fill: none; stroke: #b66a3c; stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
     .point { fill: #b66a3c; }
+    @media (prefers-color-scheme: dark) {
+      .title { fill: #d4a27f; }
+      .subtitle, .label { fill: #8c959f; }
+      .grid { stroke: #30363d; }
+      .axis { stroke: #6e7681; }
+      .area { fill: #c69069; fill-opacity: .2; }
+      .trend { stroke: #d4a27f; }
+      .point { fill: #d4a27f; }
+    }
   </style>
   <text class="title" x="72" y="28">Nanako0129/sepia GitHub Stars</text>
   <text class="subtitle" x="600" y="28">637 Stars · snapshot 2026-08-29 23:02 UTC</text>
