@@ -34,22 +34,20 @@ The governing principle throughout: **calibrate to the human distribution, don't
 
 ## Operation entries
 
-The complete plugin package gives Claude Code, Codex, and Grok Build a general router plus four direct operation entries:
+The complete plugin package gives Claude Code, Codex, Grok Build, and Antigravity a general router plus four direct operation entries:
 
-| Operation | Claude Code | Codex | Grok Build | Meaning |
-|---|---|---|---|---|
-| write | `/sepia-write` | `$sepia-write` | `/sepia-write` | Create new prose |
-| review | `/sepia-review` | `$sepia-review` | `/sepia-review` | Diagnose without editing |
-| refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | Make minimal in-place edits |
-| recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | Rewrite from the source facts and intent |
+| Operation | Claude Code | Codex | Grok Build | Antigravity | Meaning |
+|---|---|---|---|---|---|
+| write | `/sepia-write` | `$sepia-write` | `/sepia-write` | `/sepia-write` | Create new prose |
+| review | `/sepia-review` | `$sepia-review` | `/sepia-review` | `/sepia-review` | Diagnose without editing |
+| refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | `/sepia-refactor` | Make minimal in-place edits |
+| recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | `/sepia-recreate` | Rewrite from the source facts and intent |
 
-The general `/sepia` (Claude Code and Grok Build) or `$sepia` (Codex) router remains available. The operation wrappers depend on their sibling canonical skill, so standalone wrapper installation is unsupported; install the complete plugin package. This table documents package syntax; installed UI and runtime behavior were not exercised for `v0.3.0`.
-
-Antigravity's `v0.3.0` manual installer continues to use `/sepia <operation>`; it does not expose separate operation entries.
+The general `/sepia` (Claude Code, Grok Build, and Antigravity) or `$sepia` (Codex) router remains available. The operation wrappers depend on their sibling canonical skill, so standalone wrapper installation is unsupported; install the complete plugin package. This table documents package syntax; installed UI and runtime behavior were not exercised as part of this change.
 
 ## Install
 
-Claude Code, Codex, and Grok Build use their native plugin installers. Antigravity uses the manual path below. Every install defaults to **user scope** — install once, use it in every project.
+All four tools use their native plugin installers. Every install defaults to **user scope** — install once, use it in every project.
 
 ### Claude Code
 
@@ -91,28 +89,10 @@ Grok also auto-discovers a Claude Code install of sepia if you have one; either 
 
 ### Antigravity
 
-Antigravity has no marketplace. This fresh install is pinned to the current release, `v0.3.0`, and aborts if either destination already exists:
-
 ```bash
-(
-  set -e
-
-  skill="$HOME/.gemini/config/skills/sepia"
-  workflow="$HOME/.gemini/antigravity/global_workflows/sepia.md"
-
-  if [ -e "$skill" ] || [ -L "$skill" ] || [ -e "$workflow" ] || [ -L "$workflow" ]; then
-    echo "Antigravity install aborted: move the existing skill and workflow aside first." >&2
-    exit 1
-  fi
-
-  git clone --branch v0.3.0 --depth 1 https://github.com/Nanako0129/sepia.git "$HOME/.sepia"
-  mkdir -p "$HOME/.gemini/config/skills" "$HOME/.gemini/antigravity/global_workflows"
-  cp -R "$HOME/.sepia/skills/sepia" "$skill"
-  cp "$HOME/.sepia/.agents/workflows/sepia.md" "$workflow"
-)
+# install directly from GitHub
+agy plugin install https://github.com/Nanako0129/sepia
 ```
-
-Antigravity has no automated updater. To update or roll back, inspect the release you want, move the current clone, skill, and workflow aside under backup names you choose, then repeat this fresh install with that release tag.
 
 ### Skills CLI (alternative, 77+ agents)
 
@@ -127,7 +107,7 @@ When one repo should pin its own copy, commit `skills/sepia/` into that repo as 
 
 ## Uninstall
 
-Claude Code, Codex, and Grok Build each use their native command:
+Each tool uses its native command:
 
 ```bash
 # Claude Code
@@ -138,41 +118,16 @@ codex plugin remove sepia@sepia
 
 # Grok Build
 grok plugin uninstall sepia
+
+# Antigravity
+agy plugin uninstall sepia
 ```
-
-For Antigravity, disable both entries by renaming them. The preflight stops before either move if a source is missing or a `.disabled` target already exists:
-
-```bash
-(
-  set -e
-
-  skill="$HOME/.gemini/config/skills/sepia"
-  workflow="$HOME/.gemini/antigravity/global_workflows/sepia.md"
-
-  if [ ! -e "$skill" ] && [ ! -L "$skill" ]; then
-    echo "Antigravity disable aborted: skill not found." >&2
-    exit 1
-  fi
-  if [ ! -e "$workflow" ] && [ ! -L "$workflow" ]; then
-    echo "Antigravity disable aborted: workflow not found." >&2
-    exit 1
-  fi
-  if [ -e "$skill.disabled" ] || [ -L "$skill.disabled" ] || [ -e "$workflow.disabled" ] || [ -L "$workflow.disabled" ]; then
-    echo "Antigravity disable aborted: a .disabled target already exists." >&2
-    exit 1
-  fi
-
-  mv "$skill" "$skill.disabled"
-  mv "$workflow" "$workflow.disabled"
-)
-```
-
-This leaves `~/.sepia` in place for inspection. Deleting it is a separate manual decision.
 
 ## Layout
 
 ```text
 sepia/
+├── plugin.json              # Antigravity packaging
 ├── skills/
 │   ├── sepia/                # canonical skill (Agent Skills standard)
 │   │   ├── SKILL.md          # routing, operations, calibration rules, guardrails

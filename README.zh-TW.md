@@ -34,22 +34,20 @@ sepia 把這些實測差距，連同 [`research/`](research/) 裡整理過的十
 
 ## 操作入口
 
-完整 plugin package 會在 Claude Code、Codex 與 Grok Build 提供一個通用 router，以及四個可直接呼叫的操作入口：
+完整 plugin package 會在 Claude Code、Codex、Grok Build 與 Antigravity 提供一個通用 router，以及四個可直接呼叫的操作入口：
 
-| 操作 | Claude Code | Codex | Grok Build | 用途 |
-|---|---|---|---|---|
-| write | `/sepia-write` | `$sepia-write` | `/sepia-write` | 撰寫新內容 |
-| review | `/sepia-review` | `$sepia-review` | `/sepia-review` | 只診斷，不修改 |
-| refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | 在原文上做最小修改 |
-| recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | 依原始事實與意圖重新撰寫 |
+| 操作 | Claude Code | Codex | Grok Build | Antigravity | 用途 |
+|---|---|---|---|---|---|
+| write | `/sepia-write` | `$sepia-write` | `/sepia-write` | `/sepia-write` | 撰寫新內容 |
+| review | `/sepia-review` | `$sepia-review` | `/sepia-review` | `/sepia-review` | 只診斷，不修改 |
+| refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | `/sepia-refactor` | 在原文上做最小修改 |
+| recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | `/sepia-recreate` | 依原始事實與意圖重新撰寫 |
 
-通用 router 仍可透過 `/sepia`（Claude Code、Grok Build）或 `$sepia`（Codex）使用。操作 wrapper 依賴同一套 package 裡的正典 skill，不支援單獨安裝；請安裝完整 plugin package。這張表只記錄 package 語法；`v0.3.0` 尚未實測安裝後的 UI 與 runtime 行為。
-
-Antigravity 的 `v0.3.0` 手動安裝流程仍使用 `/sepia <operation>`，不提供獨立操作入口。
+通用 router 仍可透過 `/sepia`（Claude Code、Grok Build、Antigravity）或 `$sepia`（Codex）使用。操作 wrapper 依賴同一套 package 裡的正典 skill，不支援單獨安裝；請安裝完整 plugin package。這張表只記錄 package 語法；本次變更尚未實測安裝後的 UI 與 runtime 行為。
 
 ## 安裝
 
-Claude Code、Codex 與 Grok Build 使用各自的原生 plugin installer；Antigravity 依照下方的手動流程。全部預設採用 **user scope**：安裝一次，每個專案都能用。
+四套工具都使用各自的原生 plugin installer。全部預設採用 **user scope**：安裝一次，每個專案都能用。
 
 ### Claude Code
 
@@ -91,28 +89,10 @@ Grok 也會自動找到既有的 Claude Code sepia 安裝；兩種方式都能�
 
 ### Antigravity
 
-Antigravity 沒有 marketplace。以下全新安裝固定使用目前的 `v0.3.0` release；任一目的地已存在就會中止：
-
 ```bash
-(
-  set -e
-
-  skill="$HOME/.gemini/config/skills/sepia"
-  workflow="$HOME/.gemini/antigravity/global_workflows/sepia.md"
-
-  if [ -e "$skill" ] || [ -L "$skill" ] || [ -e "$workflow" ] || [ -L "$workflow" ]; then
-    echo "Antigravity install aborted: move the existing skill and workflow aside first." >&2
-    exit 1
-  fi
-
-  git clone --branch v0.3.0 --depth 1 https://github.com/Nanako0129/sepia.git "$HOME/.sepia"
-  mkdir -p "$HOME/.gemini/config/skills" "$HOME/.gemini/antigravity/global_workflows"
-  cp -R "$HOME/.sepia/skills/sepia" "$skill"
-  cp "$HOME/.sepia/.agents/workflows/sepia.md" "$workflow"
-)
+# install directly from GitHub
+agy plugin install https://github.com/Nanako0129/sepia
 ```
-
-Antigravity 沒有自動更新程式。要更新或回復舊版，先檢查想使用的 release，把目前的 clone、skill 與 workflow 移到自行命名的備份路徑，再用該 release tag 重做全新安裝。
 
 ### Skills CLI（替代方案，77+ 個 agent）
 
@@ -127,7 +107,7 @@ npx skills update -g                   # update
 
 ## 解除安裝
 
-Claude Code、Codex 與 Grok Build 各自使用原生指令：
+各套工具都使用原生指令：
 
 ```bash
 # Claude Code
@@ -138,41 +118,16 @@ codex plugin remove sepia@sepia
 
 # Grok Build
 grok plugin uninstall sepia
+
+# Antigravity
+agy plugin uninstall sepia
 ```
-
-Antigravity 透過重新命名停用 skill 與 workflow，之後仍可復原。如果來源缺少，或任一 `.disabled` 目的地已存在，預先檢查會在移動前中止：
-
-```bash
-(
-  set -e
-
-  skill="$HOME/.gemini/config/skills/sepia"
-  workflow="$HOME/.gemini/antigravity/global_workflows/sepia.md"
-
-  if [ ! -e "$skill" ] && [ ! -L "$skill" ]; then
-    echo "Antigravity disable aborted: skill not found." >&2
-    exit 1
-  fi
-  if [ ! -e "$workflow" ] && [ ! -L "$workflow" ]; then
-    echo "Antigravity disable aborted: workflow not found." >&2
-    exit 1
-  fi
-  if [ -e "$skill.disabled" ] || [ -L "$skill.disabled" ] || [ -e "$workflow.disabled" ] || [ -L "$workflow.disabled" ]; then
-    echo "Antigravity disable aborted: a .disabled target already exists." >&2
-    exit 1
-  fi
-
-  mv "$skill" "$skill.disabled"
-  mv "$workflow" "$workflow.disabled"
-)
-```
-
-這些指令會保留 `~/.sepia` 供檢查。是否刪除該 clone，請另行手動決定。
 
 ## 目錄結構
 
 ```text
 sepia/
+├── plugin.json              # Antigravity packaging
 ├── skills/
 │   ├── sepia/                # 正典 skill（Agent Skills standard）
 │   │   ├── SKILL.md          # routing、operations、calibration rules、guardrails
