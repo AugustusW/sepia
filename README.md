@@ -6,31 +6,6 @@
 
 A portable [Agent Skill](https://agentskills.io/specification) for Claude Code, Codex, Grok Build, and Antigravity. One canonical `SKILL.md`, no per-platform forks. Four operations: **write**, **review** (diagnose only), **refactor** (minimal edits), **recreate** (full rewrite).
 
-## Operation entries
-
-The complete plugin package gives Claude Code, Codex, and Grok Build a general router plus four direct operation entries:
-
-| Operation | Claude Code | Codex | Grok Build | Meaning |
-|---|---|---|---|---|
-| write | `/sepia-write` | `$sepia-write` | `/sepia-write` | Create new prose |
-| review | `/sepia-review` | `$sepia-review` | `/sepia-review` | Diagnose without editing |
-| refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | Make minimal in-place edits |
-| recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | Rewrite from the source facts and intent |
-
-The general `/sepia` (Claude Code and Grok Build) or `$sepia` (Codex) router remains available. The operation wrappers depend on their sibling canonical skill, so standalone wrapper installation is unsupported; install the complete plugin package. This table documents package syntax; installed UI and runtime behavior were not exercised for `v0.3.0`.
-
-Antigravity's `v0.3.0` manual installer continues to use `/sepia <operation>`; it does not expose separate operation entries.
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=Nanako0129%2Fsepia&type=date&legend=top-left">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&theme=dark&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
-    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
-  </picture>
-</a>
-
 ## Why another humanizer
 
 Every popular humanizer edits word choice and syntax. [StoryScope](https://arxiv.org/abs/2604.03136) (Russell et al., 2026: 61,608 stories, human + 5 frontier LLMs) showed that a classifier using **narrative-structure features alone** detects AI fiction at 93.2% macro-F1, and that editing the surface style away barely moves it (95.5% → 93.9%). The tells that survive are architectural: themes explained by the narrator, single-track causally-tidy plots, emotions rendered only as bodily sensation, no real-world references, no reader, linear time, endings resolved by protagonist growth and acceptance.
@@ -56,6 +31,21 @@ Professional prose fails differently. The studies point at filler that carries n
 | Technical articles | open at the problem, one real dead end, one committed opinion, numbers with conditions |
 
 The governing principle throughout: **calibrate to the human distribution, don't invert the AI one.** Humans sit at moderate values; a story with every rule applied is a new fingerprint. The skill selects 3–5 moves per story and leaves slack.
+
+## Operation entries
+
+The complete plugin package gives Claude Code, Codex, and Grok Build a general router plus four direct operation entries:
+
+| Operation | Claude Code | Codex | Grok Build | Meaning |
+|---|---|---|---|---|
+| write | `/sepia-write` | `$sepia-write` | `/sepia-write` | Create new prose |
+| review | `/sepia-review` | `$sepia-review` | `/sepia-review` | Diagnose without editing |
+| refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | Make minimal in-place edits |
+| recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | Rewrite from the source facts and intent |
+
+The general `/sepia` (Claude Code and Grok Build) or `$sepia` (Codex) router remains available. The operation wrappers depend on their sibling canonical skill, so standalone wrapper installation is unsupported; install the complete plugin package. This table documents package syntax; installed UI and runtime behavior were not exercised for `v0.3.0`.
+
+Antigravity's `v0.3.0` manual installer continues to use `/sepia <operation>`; it does not expose separate operation entries.
 
 ## Install
 
@@ -196,6 +186,16 @@ sepia/
 ├── .agents/                 # Codex/Antigravity workspace-mode discovery + Antigravity workflow
 └── research/                # digested evidence base with sources
 ```
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=Nanako0129%2Fsepia&type=date&legend=top-left">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&theme=dark&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
+    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
+  </picture>
+</a>
 
 ## Sources
 
