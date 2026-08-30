@@ -47,7 +47,7 @@ The general `/sepia` (Claude Code, Grok Build, and Antigravity) or `$sepia` (Cod
 
 ## Install
 
-All four tools use their native plugin installers. Antigravity installs the plugin directly from its GitHub URL through `agy`. Every install defaults to **user scope** — install once, use it in every project.
+All four tools use their native plugin installers. Every install defaults to **user scope** — install once, use it in every project.
 
 ### Claude Code
 

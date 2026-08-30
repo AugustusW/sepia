@@ -47,7 +47,7 @@ sepia 把這些實測差距，連同 [`research/`](research/) 裡整理過的十
 
 ## 安裝
 
-四套工具都使用各自的原生 plugin installer。Antigravity 透過 `agy`，直接從 GitHub URL 安裝 plugin。全部預設採用 **user scope**：安裝一次，每個專案都能用。
+四套工具都使用各自的原生 plugin installer。全部預設採用 **user scope**：安裝一次，每個專案都能用。
 
 ### Claude Code
 
