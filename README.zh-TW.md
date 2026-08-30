@@ -21,6 +21,12 @@
 
 Antigravity 固定使用 `v0.2.0` 的手動安裝流程，本次維持不變，呼叫方式仍是 `/sepia <operation>`。這個 slice 不為 Antigravity 新增獨立操作入口。
 
+## Star 趨勢
+
+[![Nanako0129/sepia 的 GitHub Star 趨勢圖](assets/star-history.svg)](https://github.com/Nanako0129/sepia/stargazers)
+
+這是依 GitHub stargazer 時間戳記建立、commit 進 repo 的快照；截至 `2026-08-29 23:02 UTC` 共累計 637 顆 Star。圖表不是即時追蹤，也不會自動更新。
+
 ## 為什麼還需要另一個 humanizer
 
 常見的 humanizer 都在改用詞與句法。[StoryScope](https://arxiv.org/abs/2604.03136)（Russell et al., 2026：61,608 篇故事，涵蓋人類與 5 個頂尖 LLM）顯示，只靠**敘事結構特徵**的分類器就能以 93.2% macro-F1 偵測 AI 小說；把字句風格修掉，分類表現也只從 95.5% 降到 93.9%。留下的破綻都在架構層：敘事者直接講明主題、單線且因果收得過於工整的情節、情緒只靠身體感受呈現、沒有真實世界的參照、讀者缺席、時間全程線性，以及靠主角成長與接納收束的結局。

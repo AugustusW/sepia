@@ -21,6 +21,12 @@ The general `/sepia` (Claude Code and Grok Build) or `$sepia` (Codex) router rem
 
 Antigravity's pinned `v0.2.0` manual installer remains unchanged and continues to use `/sepia <operation>`. This slice does not add separate Antigravity operation entries.
 
+## Star history
+
+[![GitHub Star history for Nanako0129/sepia](assets/star-history.svg)](https://github.com/Nanako0129/sepia/stargazers)
+
+Committed snapshot from GitHub stargazer timestamps at `2026-08-29 23:02 UTC`: 637 cumulative Stars. This is not live tracking or an automatic refresh.
+
 ## Why another humanizer
 
 Every popular humanizer edits word choice and syntax. [StoryScope](https://arxiv.org/abs/2604.03136) (Russell et al., 2026: 61,608 stories, human + 5 frontier LLMs) showed that a classifier using **narrative-structure features alone** detects AI fiction at 93.2% macro-F1, and that editing the surface style away barely moves it (95.5% → 93.9%). The tells that survive are architectural: themes explained by the narrator, single-track causally-tidy plots, emotions rendered only as bodily sensation, no real-world references, no reader, linear time, endings resolved by protagonist growth and acceptance.
