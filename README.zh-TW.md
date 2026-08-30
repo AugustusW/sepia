@@ -90,7 +90,7 @@ Grok 也會自動找到既有的 Claude Code sepia 安裝；兩種方式都能�
 ### Antigravity
 
 ```bash
-# 直接從 GitHub 安裝
+# install directly from GitHub
 agy plugin install https://github.com/Nanako0129/sepia
 ```
 
