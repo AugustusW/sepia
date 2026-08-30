@@ -17,15 +17,19 @@
 | refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | 在原文上做最小修改 |
 | recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | 依原始事實與意圖重新撰寫 |
 
-通用 router 仍可透過 `/sepia`（Claude Code、Grok Build）或 `$sepia`（Codex）使用。操作 wrapper 依賴同一套 package 裡的正典 skill，不支援單獨安裝；請安裝完整 plugin package。這張表只記錄 package 語法，不表示這份尚未發版的 checkout 已完成安裝或 runtime 測試。
+通用 router 仍可透過 `/sepia`（Claude Code、Grok Build）或 `$sepia`（Codex）使用。操作 wrapper 依賴同一套 package 裡的正典 skill，不支援單獨安裝；請安裝完整 plugin package。這張表只記錄 package 語法；`v0.3.0` 尚未實測安裝後的 UI 與 runtime 行為。
 
-Antigravity 固定使用 `v0.2.0` 的手動安裝流程，本次維持不變，呼叫方式仍是 `/sepia <operation>`。這個 slice 不為 Antigravity 新增獨立操作入口。
+Antigravity 的 `v0.3.0` 手動安裝流程仍使用 `/sepia <operation>`，不提供獨立操作入口。
 
 ## Star 趨勢
 
-[![Nanako0129/sepia 的 GitHub Star 趨勢圖](assets/star-history.svg)](https://github.com/Nanako0129/sepia/stargazers)
-
-這是依 GitHub stargazer 時間戳記建立、commit 進 repo 的快照；截至 `2026-08-29 23:02 UTC` 共累計 637 顆 Star。圖表不是即時追蹤，也不會自動更新。
+<a href="https://www.star-history.com/?repos=Nanako0129%2Fsepia&type=date&legend=top-left">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&theme=dark&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
+    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
+  </picture>
+</a>
 
 ## 為什麼還需要另一個 humanizer
 
@@ -97,7 +101,7 @@ Grok 也會自動找到既有的 Claude Code sepia 安裝；兩種方式都能�
 
 ### Antigravity
 
-Antigravity 沒有 marketplace。以下全新安裝固定使用目前的 `v0.2.0` release；任一目的地已存在就會中止：
+Antigravity 沒有 marketplace。以下全新安裝固定使用目前的 `v0.3.0` release；任一目的地已存在就會中止：
 
 ```bash
 (
@@ -111,7 +115,7 @@ Antigravity 沒有 marketplace。以下全新安裝固定使用目前的 `v0.2.0
     exit 1
   fi
 
-  git clone --branch v0.2.0 --depth 1 https://github.com/Nanako0129/sepia.git "$HOME/.sepia"
+  git clone --branch v0.3.0 --depth 1 https://github.com/Nanako0129/sepia.git "$HOME/.sepia"
   mkdir -p "$HOME/.gemini/config/skills" "$HOME/.gemini/antigravity/global_workflows"
   cp -R "$HOME/.sepia/skills/sepia" "$skill"
   cp "$HOME/.sepia/.agents/workflows/sepia.md" "$workflow"

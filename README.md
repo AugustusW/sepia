@@ -17,15 +17,19 @@ The complete plugin package gives Claude Code, Codex, and Grok Build a general r
 | refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | Make minimal in-place edits |
 | recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | Rewrite from the source facts and intent |
 
-The general `/sepia` (Claude Code and Grok Build) or `$sepia` (Codex) router remains available. The operation wrappers depend on their sibling canonical skill, so standalone wrapper installation is unsupported; install the complete plugin package. This table documents package syntax, not a claim that this unreleased checkout was installed or runtime-tested.
+The general `/sepia` (Claude Code and Grok Build) or `$sepia` (Codex) router remains available. The operation wrappers depend on their sibling canonical skill, so standalone wrapper installation is unsupported; install the complete plugin package. This table documents package syntax; installed UI and runtime behavior were not exercised for `v0.3.0`.
 
-Antigravity's pinned `v0.2.0` manual installer remains unchanged and continues to use `/sepia <operation>`. This slice does not add separate Antigravity operation entries.
+Antigravity's `v0.3.0` manual installer continues to use `/sepia <operation>`; it does not expose separate operation entries.
 
-## Star history
+## Star History
 
-[![GitHub Star history for Nanako0129/sepia](assets/star-history.svg)](https://github.com/Nanako0129/sepia/stargazers)
-
-Committed snapshot from GitHub stargazer timestamps at `2026-08-29 23:02 UTC`: 637 cumulative Stars. This is not live tracking or an automatic refresh.
+<a href="https://www.star-history.com/?repos=Nanako0129%2Fsepia&type=date&legend=top-left">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&theme=dark&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
+    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
+  </picture>
+</a>
 
 ## Why another humanizer
 
@@ -97,7 +101,7 @@ Grok also auto-discovers a Claude Code install of sepia if you have one; either 
 
 ### Antigravity
 
-Antigravity has no marketplace. This fresh install is pinned to the current release, `v0.2.0`, and aborts if either destination already exists:
+Antigravity has no marketplace. This fresh install is pinned to the current release, `v0.3.0`, and aborts if either destination already exists:
 
 ```bash
 (
@@ -111,7 +115,7 @@ Antigravity has no marketplace. This fresh install is pinned to the current rele
     exit 1
   fi
 
-  git clone --branch v0.2.0 --depth 1 https://github.com/Nanako0129/sepia.git "$HOME/.sepia"
+  git clone --branch v0.3.0 --depth 1 https://github.com/Nanako0129/sepia.git "$HOME/.sepia"
   mkdir -p "$HOME/.gemini/config/skills" "$HOME/.gemini/antigravity/global_workflows"
   cp -R "$HOME/.sepia/skills/sepia" "$skill"
   cp "$HOME/.sepia/.agents/workflows/sepia.md" "$workflow"
