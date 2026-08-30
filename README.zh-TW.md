@@ -6,31 +6,6 @@
 
 這是一套可攜的 [Agent Skill](https://agentskills.io/specification)，支援 Claude Code、Codex、Grok Build 與 Antigravity。全平台共用唯一一份正典 `SKILL.md`，不另開平台分支。四種操作：**write**、**review**（只診斷）、**refactor**（最小修改）、**recreate**（整篇重寫）。
 
-## 操作入口
-
-完整 plugin package 會在 Claude Code、Codex 與 Grok Build 提供一個通用 router，以及四個可直接呼叫的操作入口：
-
-| 操作 | Claude Code | Codex | Grok Build | 用途 |
-|---|---|---|---|---|
-| write | `/sepia-write` | `$sepia-write` | `/sepia-write` | 撰寫新內容 |
-| review | `/sepia-review` | `$sepia-review` | `/sepia-review` | 只診斷，不修改 |
-| refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | 在原文上做最小修改 |
-| recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | 依原始事實與意圖重新撰寫 |
-
-通用 router 仍可透過 `/sepia`（Claude Code、Grok Build）或 `$sepia`（Codex）使用。操作 wrapper 依賴同一套 package 裡的正典 skill，不支援單獨安裝；請安裝完整 plugin package。這張表只記錄 package 語法；`v0.3.0` 尚未實測安裝後的 UI 與 runtime 行為。
-
-Antigravity 的 `v0.3.0` 手動安裝流程仍使用 `/sepia <operation>`，不提供獨立操作入口。
-
-## Star 趨勢
-
-<a href="https://www.star-history.com/?repos=Nanako0129%2Fsepia&type=date&legend=top-left">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&theme=dark&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
-    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
-  </picture>
-</a>
-
 ## 為什麼還需要另一個 humanizer
 
 常見的 humanizer 都在改用詞與句法。[StoryScope](https://arxiv.org/abs/2604.03136)（Russell et al., 2026：61,608 篇故事，涵蓋人類與 5 個頂尖 LLM）顯示，只靠**敘事結構特徵**的分類器就能以 93.2% macro-F1 偵測 AI 小說；把字句風格修掉，分類表現也只從 95.5% 降到 93.9%。留下的破綻都在架構層：敘事者直接講明主題、單線且因果收得過於工整的情節、情緒只靠身體感受呈現、沒有真實世界的參照、讀者缺席、時間全程線性，以及靠主角成長與接納收束的結局。
@@ -56,6 +31,21 @@ sepia 把這些實測差距，連同 [`research/`](research/) 裡整理過的十
 | 技術文章 | 從問題切入、保留一條真實走過的死路、提出一個明確判斷、數字附上適用條件 |
 
 貫穿全篇的原則：**以整個人類分布為校準目標，別把 AI 分布直接倒過來套**。人類的數值多落在中間。每條規則都用上的故事會形成另一種指紋；sepia 每篇只選 3–5 個手法，其餘留白。
+
+## 操作入口
+
+完整 plugin package 會在 Claude Code、Codex 與 Grok Build 提供一個通用 router，以及四個可直接呼叫的操作入口：
+
+| 操作 | Claude Code | Codex | Grok Build | 用途 |
+|---|---|---|---|---|
+| write | `/sepia-write` | `$sepia-write` | `/sepia-write` | 撰寫新內容 |
+| review | `/sepia-review` | `$sepia-review` | `/sepia-review` | 只診斷，不修改 |
+| refactor | `/sepia-refactor` | `$sepia-refactor` | `/sepia-refactor` | 在原文上做最小修改 |
+| recreate | `/sepia-recreate` | `$sepia-recreate` | `/sepia-recreate` | 依原始事實與意圖重新撰寫 |
+
+通用 router 仍可透過 `/sepia`（Claude Code、Grok Build）或 `$sepia`（Codex）使用。操作 wrapper 依賴同一套 package 裡的正典 skill，不支援單獨安裝；請安裝完整 plugin package。這張表只記錄 package 語法；`v0.3.0` 尚未實測安裝後的 UI 與 runtime 行為。
+
+Antigravity 的 `v0.3.0` 手動安裝流程仍使用 `/sepia <operation>`，不提供獨立操作入口。
 
 ## 安裝
 
@@ -196,6 +186,16 @@ sepia/
 ├── .agents/                 # Codex/Antigravity workspace-mode discovery + Antigravity workflow
 └── research/                # digested evidence base with sources
 ```
+
+## Star 趨勢
+
+<a href="https://www.star-history.com/?repos=Nanako0129%2Fsepia&type=date&legend=top-left">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&theme=dark&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
+    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Nanako0129%2Fsepia&type=date&legend=top-left&sealed_token=tvzQmDPYfGPfGtBVAmiPEqqGYMMK8T1SUMAXlEaJL1B2Me9ZcXDPNjPj0qV3TVzyz-_uYj4Xh25L3X81y9pimzDevwlWTlJQKZr38HogEqXFAPRbtrv8NFnNCrguM2lvqNG5_DS_1W_8rttYAiJEOaGd1onyFf4NYmmQPGoHuwTyhiJDPdmiYOL3AOKK">
+  </picture>
+</a>
 
 ## 資料來源
 
