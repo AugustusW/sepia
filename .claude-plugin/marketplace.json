@@ -3,12 +3,12 @@
   "owner": {
     "name": "Nanako Tsai"
   },
-  "description": "A writing skill that strips AI flavor from generated text. Fiction gets narrative-architecture repair; professional documents get rules matched to their venue.",
+  "description": "De-AI writing package with the general Sepia router plus four separate operation entries: write, review, refactor, and recreate.",
   "plugins": [
     {
       "name": "sepia",
       "source": "./",
-      "description": "Installs the sepia skill: routing for six document types, four operations (write, review, refactor, recreate), a 30-feature fiction rubric, and per-model fingerprint tables."
+      "description": "Installs the general Sepia router plus four separate operation entries: sepia-write, sepia-review, sepia-refactor, and sepia-recreate."
     }
   ]
 }
