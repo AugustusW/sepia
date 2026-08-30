@@ -1,10 +1,10 @@
 # Pass 2 — Discourse flow
 
-The layer between plot and sentences: how paragraphs advance, where the energy sags, and where things sit on the page. Evidence: QUDsim/COLM 2025 (Q), Tripto et al. EMNLP 2025 (T), Russell et al. ACL 2025 (R), Beguš 2024 (B), asavvin's outline test (A).
+The layer between plot and sentences: how paragraphs advance, where the energy sags, and where things sit on the page. Evidence: QUDsim/COLM 2025 (Q), Tripto et al. EMNLP 2025 (T), Russell et al. ACL 2025 (R), Beguš 2024 (B), asavvin's outline test (A). Stable source identities live in the repository research ledger; single-letter aliases in this file are file-local. Prescriptions are Sepia design inferences unless a cited source explicitly tested the intervention.
 
 ## 1 The QUD check — what question does each paragraph answer?
 
-Every paragraph implicitly answers a question. LLM narratives walk a template of questions regardless of surface wording — two models given the same premise independently produced the identical sequence *scene briefing → justifying the deception → social consequences → the weight of responsibility* (Q). Rewording sentences cannot hide this; only reordering and replacing the questions can.
+Every paragraph implicitly answers a question. In QUDsim's tested samples, two models given the same premise independently reused the sequence *scene briefing → justifying the deception → social consequences → the weight of responsibility* (Q). Surface rewording does not change that question sequence; changing it requires reordering or replacing the underlying moves.
 
 **Check:** List one implicit question per paragraph/scene of the outline or draft. Flags:
 
@@ -48,6 +48,6 @@ The machine opening: establish time + place + weather, introduce the character w
 
 ## 5 Names
 
-Models converge on the same character names — Elara, Ava, Amelia; Emily and Sarah appeared in 63–70% of tested AI articles, everyone titled "Dr." (B, R).
+The tested model outputs converged on recurring names such as Elara, Ava, and Amelia; Emily or Sarah appeared in 63–70% of the AI articles, and formal titles were overrepresented (B, R).
 
 **Fix:** name characters from the story's specific world (ethnicity, region, generation, class), let surnames and nicknames do social work, drop titles except where the fiction needs them, and let different characters call the same person different things.

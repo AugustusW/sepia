@@ -1,6 +1,6 @@
 # Pass 3 — Surface style
 
-Run last, after structure is fixed. Evidence: LAMP/CHI 2025 (L), Reinhart et al. PNAS 2025 (P), Russell et al. ACL 2025 (R), Shaib et al. slop taxonomy (S), fiction/RP community ban lists (F). Editing operations should skew **replace 74% / delete 18% / insert 8%** (L) — when in doubt, cut. The one exception that may grow text: adding concrete specificity.
+Run last, after structure is fixed. Evidence: LAMP/CHI 2025 (L), Reinhart et al. PNAS 2025 (P), Russell et al. ACL 2025 (R), Shaib et al. slop taxonomy (S), fiction/RP community ban lists (F). Stable source identities live in the repository research ledger; single-letter aliases in this file are file-local. Prescriptions are Sepia design inferences unless a cited source explicitly tested the intervention. Editing operations should skew **replace 74% / delete 18% / insert 8%** (L) — when in doubt, cut. The one exception that may grow text: adding concrete specificity.
 
 ## 1 The seven artifacts (professional-editor taxonomy, L)
 
@@ -62,7 +62,7 @@ Instruct-tuned models systematically suppress these (P: usage 13–80% of human 
 
 ## 5 Genre alignment
 
-Half of surface AI-ness is register mismatch: instruct models write one noun-heavy, information-dense, evenly-polished prose regardless of genre (P). Before editing, state the target register (literary / pulp / YA / essayistic) and edit toward *that* — a de-AI'd thriller and a de-AI'd literary story should not end up in the same voice. Sentence length variance, contraction rate, and vocabulary plainness are genre parameters, not universal constants.
+Reinhart et al. report that instruction-tuned models favor an informationally dense, noun-heavy style and struggle to match genre-aligned variation (P). Before editing, state the target register (literary / pulp / YA / essayistic) and edit toward *that* — a de-AI'd thriller and a de-AI'd literary story should not end up in the same voice. Sentence length variance, contraction rate, and vocabulary plainness are genre parameters, not universal constants.
 
 ## 6 The read-aloud test
 
@@ -81,4 +81,4 @@ Do **not** flag or "fix" these — over-correction is its own fingerprint:
 | The author's own verified habits | If the user's samples use em-dashes or "moreover," those stay |
 | Moderate ordinary sentences | Slack is human; do not polish every line to distinctiveness |
 
-> Informality is not a disguise. Current-generation models already fake casual registers, and expert detectors read "informal but otherwise fully machine-patterned" as AI instantly (R). Surface fixes only hold when passes 1–2 were done first.
+> Informality is not a disguise. In Russell et al.'s tested humanization conditions, expert readers still detected other machine-patterned cues; adding casual language alone did not remove them. The claim does not establish that every informal model output is detectable.

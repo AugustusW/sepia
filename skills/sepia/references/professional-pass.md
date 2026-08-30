@@ -1,12 +1,12 @@
 # Professional pass — shared layer for non-fiction
 
-Applies to every non-fiction domain (release notes, PR/issue replies, postmortems, tickets, technical articles, and anything else that isn't narrative). Evidence: the slop taxonomy (Shaib et al., S), expert AI-detector studies (Russell et al., R), genre-alignment findings (Reinhart et al., P), and the Wikipedia/humanizer corpus of documented tells (W).
+Applies to every non-fiction domain (release notes, PR/issue replies, postmortems, tickets, technical articles, and anything else that isn't narrative). Evidence: the slop taxonomy (Shaib et al., S), expert AI-detector studies (Russell et al., R), genre-alignment findings (Reinhart et al., P), and the Wikipedia/humanizer corpus of documented tells (W). Stable source identities live in the repository research ledger; single-letter aliases in this file are file-local. Prescriptions are Sepia design inferences unless a cited source explicitly tested the intervention.
 
 > In professional genres the goal is not "fool a detector" — it is that the text carries information, has a stance, and sounds like it came from the person whose name is on it. Conventional structure is *fine* here; slop is the filler inside the structure.
 
 ## Read the venue first
 
-Before writing or editing, sample 2–3 recent human-written artifacts from the same venue — the repo's past release notes, the maintainer's recent replies, the team's last postmortem — and match their register, length norms, and formatting habits. Half of measured AI-ness is register mismatch: models emit one evenly-polished, noun-heavy prose regardless of venue (P). The venue corpus, not this skill, defines the target voice. When no corpus exists, the domain file's baseline applies.
+Before writing or editing, sample 2–3 recent human-written artifacts from the same venue — the repo's past release notes, the maintainer's recent replies, the team's last postmortem — and match their register, length norms, and formatting habits. Reinhart et al. report that instruction-tuned models favor an informationally dense, noun-heavy style and struggle to match genre-aligned variation (P). The venue corpus, not this skill, defines the target voice. When no corpus exists, the domain file's baseline applies.
 
 ## The checklist
 

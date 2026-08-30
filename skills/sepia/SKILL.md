@@ -8,7 +8,7 @@ metadata:
 
 # Sepia — de-AI writing
 
-Every rule here is backed by a measured human-vs-AI gap. The load-bearing facts: in fiction, a classifier using only **narrative-structure features** detects AI at 93.2% macro-F1 and style editing barely moves it — so structure is fixed before style, always. In professional prose, the measured tells are different — filler density, missing stance, chatbot residue, register mismatch, format uniformity — and the fix is domain-specific. Route first, then operate.
+This skill combines measured findings with marked editorial heuristics. In fiction, StoryScope's narrative-only classifier reached 93.2% macro-F1, while its Core Only 30-feature XGBoost held-out classifier reached 84.8% macro-F1 (AUPRC .828); the manual rubric is neither classifier. The professional path combines measured studies with editorial heuristics, and its prescriptions are Sepia inferences unless a source explicitly tested the intervention. Route first, then operate.
 
 ## Routing
 

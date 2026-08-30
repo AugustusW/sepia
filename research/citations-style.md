@@ -2,6 +2,8 @@
 
 背景研究 agent 精讀產出（2026-08-27），含各論文附錄層級的內容（LAMP 附錄 prompt、slop 附錄標註指南 Table 11、Reinhart v1 附錄完整 66 特徵表、Russell 附錄完整 taxonomy 與 AI vocab 清單）。
 
+來源 metadata 見 [sources.md](sources.md)。下文的研究結果受各自樣本限制；「規則」與操作建議是 Sepia 推論，除非明載來源測試了該介入。
+
 ## 1. LAMP：Can AI writing be salvaged?（Chakrabarty, Laban, Wu — CHI 2025, arXiv:2409.14509）
 
 資料規模：18 位 MFA 專業作家編輯 1,057 段 LLM 生成段落（GPT-4o 393、Claude-3.5-Sonnet 368、Llama-3.1-70B 296），共 8,035 個細粒度編輯（平均每段約 8 個）。文類為 literary fiction 與 creative non-fiction。
@@ -79,7 +81,7 @@ overwriting 遠比 underwriting 嚴重（"If in doubt, cut it"）。
 
 | 發現 | 數據 |
 |---|---|
-| slop 是累積量 | span 數與整體判斷 ρ=0.63；binary 標註 κ 低但 span precision 0.65–0.80 |
+| slop 是累積量 | 標註 span 數與 binary slop label 的 Spearman ρ：新聞 .70、MS MARCO .51、合併 .63；binary 標註 κ 低但 span precision 0.65–0.80 |
 | 最強預測因子（全資料） | Relevance（β̂=0.06）、Density（0.05）、Tone（0.05） |
 | 依領域分流 | 新聞＝Coherence/Tone/Density/Relevance/Bias；QA 短答＝Factuality 與 Structure |
 | **LLM 無法自我辨識 slop** | GPT-5、Deepseek-V3、o3-mini 給完整指南後 κ≈0；span precision 僅 0.13–0.16；理由過度集中在 Density |
@@ -128,7 +130,7 @@ overwriting 遠比 underwriting 嚴重（"If in doubt, cut it"）。
 過用：camaraderie ×162、tapestry ×155（**出現在 23% 的 GPT-4o 輸出**）、intricate ×119、underscore ×107、unspoken ×102、amidst ×100（27%）、palpable ×95、solace ×95、fleeting ×84、unravel ×83；4o-mini 另有 grapple ×131、ignite ×122、vibrant ×92、cacophony ×89。
 不足：髒話與口語壓到 1/100 以下——fucking、shit、ok、yep、jeez、obviously、anyways、fortunately、i.e.。
 
-關鍵詮釋：問題不在「人類不用這些詞」，而在人類不會在**這些 genre** 用——genre misalignment 是 AI 味的一半。
+關鍵詮釋（研究觀察，不是比例估計）：問題不在「人類不用這些詞」，而在人類不會在**這些 genre** 用；Reinhart 等人記錄模型難以配合文類變化，這裡不主張 genre misalignment 佔 AI 味的固定比例。
 
 ## 4. People who frequently use ChatGPT… are accurate detectors（Russell, Karpinska, Iyyer — ACL 2025, arXiv:2501.15654）
 
