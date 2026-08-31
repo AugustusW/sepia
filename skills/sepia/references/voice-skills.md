@@ -8,6 +8,8 @@ sepia calibrates toward the human distribution and the venue. A voice skill aims
 
 ## Composition order (write and recreate only)
 
+For **recreate**, the canonical preflight still comes before everything: extract and verify the source's facts, claims, and intent first — the steps below begin only after that preservation set exists.
+
 1. sepia's architecture decisions first (fiction: the architecture sheet in `narrative-pass.md`; professional: the domain file).
 2. The voice skill's moves next, applied selectively (see below).
 3. sepia review last, with the adjusted expectations in the table.
