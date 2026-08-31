@@ -4,7 +4,7 @@
 
 > De-AI writing at the layer that actually gives AI away. Fiction gets its narrative architecture repaired before anyone touches word choice; professional documents (release notes, PR replies, postmortems, tickets, technical articles) each get rules matched to their venue.
 
-A portable [Agent Skill](https://agentskills.io/specification): any agent that speaks the standard can load it, and the [Skills CLI](https://skills.sh) installs it on 77+ of them with one command. Claude Code, Codex, Grok Build, and Antigravity additionally get native plugin packaging, verified with live installs. One canonical `SKILL.md`, no per-platform forks. Four operations: **write**, **review** (diagnose only), **refactor** (minimal edits), **recreate** (full rewrite).
+A portable [Agent Skill](https://agentskills.io/specification): any agent that speaks the standard can load it, and the [Skills CLI](https://skills.sh), which supports 77+ agents, installs it with one command. Claude Code, Codex, Grok Build, and Antigravity additionally get native plugin packaging, install-verified on all four. One canonical `SKILL.md`, no per-platform forks. Four operations: **write**, **review** (diagnose only), **refactor** (minimal edits), **recreate** (full rewrite).
 
 ## Why another humanizer
 
@@ -53,19 +53,19 @@ The contract in short: sepia's architecture decisions come first, and the voice'
 
 ## Install
 
-Every install defaults to **user scope** — install once, use it in every project.
+Every command below is written for **user scope** — install once, use it in every project.
 
 ### Any agent (Skills CLI, 77+ agents)
 
 ```bash
 npx skills add Nanako0129/sepia -g     # -g = user scope; the default is project
-npx skills update -g                   # update
+npx skills update sepia -g             # update
 npx skills remove sepia -g             # uninstall
 ```
 
-Works on every agent the [Skills CLI](https://skills.sh) supports — Cursor, Cline, Windsurf, Copilot, OpenCode, goose, and more. Pick your agents when prompted. Runtime behavior outside the four platforms below has not been exercised by us; the skill is plain markdown under the Agent Skills standard, so file an issue if your agent trips on it.
+Installs on every agent the [Skills CLI](https://skills.sh) supports — Cursor, Cline, Windsurf, Copilot, OpenCode, goose, and more. Pick your agents when prompted. Runtime behavior outside the four platforms below has not been exercised by us; the skill is plain markdown under the Agent Skills standard, so file an issue if your agent trips on it.
 
-The four platforms below also have native plugin installers, each verified with a live install:
+The four platforms below have native plugin installers, each exercised with a live install. Verified means the install completes and the sepia entries appear; runtime behavior is as noted above.
 
 ### Claude Code
 
