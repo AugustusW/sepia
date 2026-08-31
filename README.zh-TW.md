@@ -45,6 +45,12 @@ sepia 把這些實測差距，連同 [`research/`](research/) 裡整理過的十
 
 通用 router 仍可透過 `/sepia`（Claude Code、Grok Build、Antigravity）或 `$sepia`（Codex）使用。操作 wrapper 依賴同一套 package 裡的正典 skill，不支援單獨安裝；請安裝完整 plugin package。這張表只記錄 package 語法；本次變更尚未實測安裝後的 UI 與 runtime 行為。
 
+## 實驗性功能：疊加聲音 skill
+
+v0.4.0 起，sepia 定義了跟聲音／風格類 skill（極簡主義方法、品牌語調、persona 指南）疊加使用的介面。採 opt-in：你明講聲音 skill 在場，sepia 才會在原路由之上載入 `references/voice-skills.md`；不講就不載入，sepia 也永遠不會自己注入美學。
+
+條約摘要：sepia 的架構決策先行，聲音技法選擇性套用（每篇挑 3–5 招招牌技法，招牌結尾公式偶爾故意打破）。review 只回報聲音的已知代價、不代修，但均勻性 finding 不打折：聲音不能豁免節拍器。專業路由上 venue 仍定語域，直接衝突交回給你決定。這個介面的依據是一次極簡規格樣本的盲審實驗，屬單一案例，不是量測證據。
+
 ## 安裝
 
 四套工具都使用各自的原生 plugin installer。全部預設採用 **user scope**：安裝一次，每個專案都能用。
@@ -131,7 +137,7 @@ sepia/
 ├── skills/
 │   ├── sepia/                # 正典 skill（Agent Skills standard）
 │   │   ├── SKILL.md          # routing、operations、calibration rules、guardrails
-│   │   └── references/       # passes、rubric、fingerprints 與 domain rules
+│   │   └── references/       # passes、rubric、fingerprints、domain rules、voice-skills（實驗性）
 │   ├── sepia-write/SKILL.md  # 固定單一操作的薄 wrapper
 │   ├── sepia-review/SKILL.md
 │   ├── sepia-refactor/SKILL.md
