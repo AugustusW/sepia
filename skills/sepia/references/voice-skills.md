@@ -6,11 +6,13 @@ Status: experimental and opt-in. Load this file only when the user says a voice 
 
 sepia calibrates toward the human distribution and the venue. A voice skill aims at one specific aesthetic, and a strong aesthetic deliberately pushes some measured axes away from the human band. Stacked naively, the two fight: sepia's review flags the voice's signature restraint or ornament as drift, and the voice's uniform application manufactures exactly the fingerprints sepia hunts. The rules below are the interface.
 
-## Composition order
+## Composition order (write and recreate only)
 
 1. sepia's architecture decisions first (fiction: the architecture sheet in `narrative-pass.md`; professional: the domain file).
 2. The voice skill's moves next, applied selectively (see below).
 3. sepia review last, with the adjusted expectations in the table.
+
+For **review** and **refactor**, the canonical operation contracts are unchanged: review diagnoses without editing, and refactor produces the complete defect list before touching anything. Under a declared voice the adjustment is interpretive only — score with the expectation table below, and in refactor do not "fix" the voice's expected costs against the user's chosen aesthetic.
 
 ## Selection applies to voice moves too
 
