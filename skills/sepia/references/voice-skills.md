@@ -2,6 +2,8 @@
 
 Status: experimental and opt-in. Load this file only when the user says a voice or style skill is stacked with sepia — a minimalism method, a brand voice, a persona guide. Never assume one is in play, and never inject an aesthetic that sepia's own references don't prescribe: the voice is the user's choice, sepia's job is calibration around it.
 
+Precedence on professional routes: the venue corpus still sets the register (`professional-pass.md`), and the voice operates inside it. Where a declared voice and the venue's register directly conflict, surface the conflict and let the user pick — never silently override either.
+
 ## Why the two need an interface
 
 sepia calibrates toward the human distribution and the venue. A voice skill aims at one specific aesthetic, and a strong aesthetic deliberately pushes some measured axes away from the human band. Stacked naively, the two fight: sepia's review flags the voice's signature restraint or ornament as drift, and the voice's uniform application manufactures exactly the fingerprints sepia hunts. The rules below are the interface.
