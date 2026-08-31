@@ -4,7 +4,7 @@
 
 > 從真正會讓 AI 洩底的層次下手。小說先修敘事架構，再碰字句；專業文件（發版說明、PR 回覆、事故檢討、工單、技術文章）則按 venue 各用一套規則。
 
-這是一套可攜的 [Agent Skill](https://agentskills.io/specification)，支援 Claude Code、Codex、Grok Build 與 Antigravity。全平台共用唯一一份正典 `SKILL.md`，不另開平台分支。四種操作：**write**、**review**（只診斷）、**refactor**（最小修改）、**recreate**（整篇重寫）。
+這是一套可攜的 [Agent Skill](https://agentskills.io/specification)：任何支援這個標準的 agent 都能載入，[Skills CLI](https://skills.sh) 一行指令可裝到 77+ 家。Claude Code、Codex、Grok Build 與 Antigravity 另有原生 plugin 打包，且經實機安裝驗證。全平台共用唯一一份正典 `SKILL.md`，不另開平台分支。四種操作：**write**、**review**（只診斷）、**refactor**（最小修改）、**recreate**（整篇重寫）。
 
 ## 為什麼還需要另一個 humanizer
 
@@ -53,7 +53,19 @@ v0.4.0 起，sepia 定義了跟聲音／風格類 skill（極簡主義方法、�
 
 ## 安裝
 
-四套工具都使用各自的原生 plugin installer。全部預設採用 **user scope**：安裝一次，每個專案都能用。
+全部預設採用 **user scope**：安裝一次，每個專案都能用。
+
+### 任何 agent（Skills CLI，77+ 家）
+
+```bash
+npx skills add Nanako0129/sepia -g     # -g 才是 user scope；預設是 project
+npx skills update -g                   # 更新
+npx skills remove sepia -g             # 解除安裝
+```
+
+[Skills CLI](https://skills.sh) 支援的 agent 都能裝：Cursor、Cline、Windsurf、Copilot、OpenCode、goose 等，執行時選你的。四大平台以外的執行行為我們沒有實測過；skill 本體是 Agent Skills 標準下的純 markdown，你的 agent 若吃不動歡迎開 issue。
+
+下面四個平台另有原生 plugin installer，各自經實機安裝驗證：
 
 ### Claude Code
 
@@ -98,13 +110,6 @@ Grok 也會自動找到既有的 Claude Code sepia 安裝；兩種方式都能�
 ```bash
 # install directly from GitHub
 agy plugin install https://github.com/Nanako0129/sepia
-```
-
-### Skills CLI（替代方案，77+ 個 agent）
-
-```bash
-npx skills add Nanako0129/sepia -g     # -g = user scope; the default is project
-npx skills update -g                   # update
 ```
 
 ### Project scope（替代方案）
