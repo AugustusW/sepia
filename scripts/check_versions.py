@@ -137,38 +137,14 @@ def read_json_versions(path, rel):
     return declared, invalid
 
 
-def _flow_metadata_version(rest, rel):
-    """The direct-child version of a flow-style `metadata: {...}` value.
-
-    Direct-child semantics are kept by deleting innermost `{...}` groups until
-    none remain: whatever survives is metadata's own level, and a version that
-    lived inside `compatibility: {...}` is gone before the scan. Values with
-    braces inside quoted strings are beyond a line scanner; if the braces do
-    not reduce cleanly the file is reported rather than guessed at.
-    """
-    if not (rest.startswith("{") and rest.endswith("}")):
-        return None, [(rel, f"metadata is {rest!r}, neither a block nor a {{...}} flow mapping")]
-
-    inner = rest[1:-1]
-    while True:
-        reduced = re.sub(r"\{[^{}]*\}", "", inner)
-        if reduced == inner:
-            break
-        inner = reduced
-    if "{" in inner or "}" in inner:
-        return None, [(rel, "metadata flow mapping has unbalanced braces; use block style")]
-
-    match = re.search(r"(?:^|,)\s*version:\s*([^,]*)", inner)
-    if not match:
-        return None, []
-    return _frontmatter_scalar(match.group(1), rel)
-
-
 def read_frontmatter_version(path, rel):
     """(version_or_None, invalid) for one SKILL.md.
 
-    Only a `version:` that is a DIRECT child of the top-level `metadata:` block
-    counts. A line scan rather than a YAML parser, carrying two pieces of
+    Only a `version:` that is a DIRECT child of a block-style top-level
+    `metadata:` counts. Inline metadata (flow mappings, scalars) is refused
+    with instructions to use block style: two review rounds of quoted-span and
+    nested-brace edge cases traced back to hand-parsing flow, and the refusal
+    is loud and names its own fix. A line scan rather than a YAML parser, carrying two pieces of
     state: entering the frontmatter's `metadata:` key opens the block and the
     next top-level key closes it, and the block's first child fixes the
     indentation that direct children must sit at. Anything deeper belongs to a
@@ -203,10 +179,15 @@ def read_frontmatter_version(path, rel):
             if head.strip() == "metadata" and sep:
                 rest = rest.split(" #")[0].strip()
                 if rest:
-                    # Flow syntax: metadata: {version: "0.4.0", ...}. Valid
-                    # YAML, and a formatter may produce it, so a version here
-                    # must be found rather than reported missing.
-                    return _flow_metadata_version(rest, rel)
+                    # An inline value (flow mapping or scalar) is refused, not
+                    # parsed. The flow parser this replaces produced two review
+                    # findings of its own (nested braces, then quoted spans),
+                    # and the failure a formatter causes here is loud and names
+                    # its own fix, while a hand-parsed flow mapping fails
+                    # quietly and wrong (review round 6).
+                    return None, [(rel,
+                        "metadata is declared inline; flow-style metadata is "
+                        "not supported, use block style")]
                 in_metadata = True
             else:
                 in_metadata = False

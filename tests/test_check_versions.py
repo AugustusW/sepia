@@ -257,14 +257,6 @@ class CheckVersionsCase(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("surrounding whitespace", report)
 
-    def test_flow_style_unquoted_values_are_rejected_too(self):
-        for value in ("1.0", "0.4.0"):
-            code, report = self.run_check(
-                {"skills/sepia/SKILL.md": skill_md(["name: sepia", f"metadata: {{version: {value}}}"])}
-            )
-            self.assertEqual(code, 1, f"flow version: {value} should be rejected")
-            self.assertIn("quote it", report)
-
     def test_a_repository_under_a_skipped_ancestor_name_still_scans(self):
         # Review round five: SKIP_DIRS applied to absolute path parts made a
         # checkout at .../venv/<repo> skip every file and report all required
@@ -280,55 +272,26 @@ class CheckVersionsCase(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("3 declarations, all 0.4.0", report)
 
-    # --- flow-style metadata ------------------------------------------------
+    # --- inline metadata is refused, not parsed (round 6) -------------------
 
-    def test_flow_style_metadata_is_read_not_reported_missing(self):
-        # Review case, round three: metadata: {version: "0.4.0"} is valid YAML
-        # that a formatter may produce. It must be read, not failed as a
-        # missing required declaration.
-        code, report = self.run_check(
-            {
-                "skills/sepia/SKILL.md": skill_md(
-                    ["name: sepia", 'metadata: {version: "0.4.0"}']
-                )
-            }
-        )
-        self.assertEqual(code, 0)
-        self.assertIn("3 declarations, all 0.4.0", report)
-
-    def test_flow_style_keeps_direct_child_semantics(self):
-        # A version nested inside a flow compatibility mapping is not the
-        # skill's version; the direct child next to it is.
-        code, report = self.run_check(
-            {
-                "skills/sepia/SKILL.md": skill_md(
-                    [
-                        "name: sepia",
-                        'metadata: {compatibility: {version: "9.9.9"}, version: "0.4.0"}',
-                    ]
-                )
-            }
-        )
-        self.assertEqual(code, 0)
-        self.assertNotIn("9.9.9", report)
-
-    def test_flow_style_with_only_a_nested_version_declares_none(self):
-        code, report = self.run_check(
-            {
-                "skills/sepia/SKILL.md": skill_md(
-                    ["name: sepia", 'metadata: {compatibility: {version: "9.9.9"}}']
-                )
-            }
-        )
-        self.assertEqual(code, 1)
-        self.assertIn("skills/sepia/SKILL.md: required", report)
-
-    def test_a_scalar_metadata_value_is_reported_not_guessed_at(self):
-        code, report = self.run_check(
-            {"skills/sepia/SKILL.md": skill_md(["name: sepia", "metadata: oops"])}
-        )
-        self.assertEqual(code, 1)
-        self.assertIn("neither a block nor a", report)
+    def test_inline_metadata_is_refused_with_block_style_instructions(self):
+        # The flow parser produced two review findings of its own (nested
+        # braces, then version-like text inside a quoted value). Deleted per
+        # review: any inline metadata value is refused with a message naming
+        # the fix. The last case is the round-six finding itself: without the
+        # deletion, text inside a quoted scalar was mistaken for a version key.
+        for inline in (
+            '{version: "0.4.0"}',
+            '{compatibility: {version: "9.9.9"}, version: "0.4.0"}',
+            '{version: 1.0}',
+            'oops',
+            '{description: "current, version: 9.9.9"}',
+        ):
+            code, report = self.run_check(
+                {"skills/sepia/SKILL.md": skill_md(["name: sepia", f"metadata: {inline}"])}
+            )
+            self.assertEqual(code, 1, f"metadata: {inline} should be refused")
+            self.assertIn("use block style", report)
 
     def test_an_empty_metadata_version_fails(self):
         code, report = self.run_check(
