@@ -208,6 +208,44 @@ class CheckVersionsCase(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("declares version 2 times", report)
 
+    def test_alternate_spellings_of_the_metadata_key_are_invalid(self):
+        # Same rule one level up (review on PR #41): "metadata": resolves to
+        # the same key in YAML, but the equality check read it as a different
+        # key and closed the block, so a stale exact-spelling block passed
+        # while the quoted block held the effective newer version.
+        for opener in ('"metadata":', "'metadata':", 'metadata :'):
+            code, report = self.run_check(
+                {
+                    "skills/sepia/SKILL.md": skill_md(
+                        ["name: sepia", "metadata:", '  version: "0.4.0"',
+                         opener, '  version: "9.9.9"']
+                    )
+                }
+            )
+            self.assertEqual(code, 1, f"{opener} should be invalid")
+            self.assertIn("spelled exactly 'metadata:'", report)
+
+    def test_a_lone_alternate_metadata_spelling_is_also_invalid(self):
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ["name: sepia", '"metadata":', '  version: "0.4.0"']
+                )
+            }
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("spelled exactly 'metadata:'", report)
+
+    def test_other_quoted_top_level_keys_are_not_flagged(self):
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ['"author": x', "name: sepia", "metadata:", '  version: "0.4.0"']
+                )
+            }
+        )
+        self.assertEqual(code, 0)
+
     def test_alternate_spellings_of_the_version_key_are_invalid(self):
         # Review on PR #41: "version": / 'version': / version : resolve to the
         # same key in YAML (Psych keeps the last value), so an alternate

@@ -69,6 +69,13 @@ REQUIRED = (
 # but the restriction is smaller and keeps the scanner a scanner.
 ALT_VERSION_KEY_RE = re.compile(r"""^(?:(["'])version\1|version\s)\s*:""")
 
+# The same rule one level up: a top-level key that YAML would read as
+# `metadata` under a spelling other than exactly `metadata:`. Psych resolves
+# a quoted "metadata": to the same key and keeps that block's value, while
+# the equality check here read it as a different key and closed the block,
+# so only the first exact-spelling block was counted (review on PR #41).
+ALT_METADATA_KEY_RE = re.compile(r"""^(?:(["'])metadata\1|metadata\s)\s*:""")
+
 
 def _iter_files(root):
     for path in sorted(root.rglob("*")):
@@ -199,6 +206,12 @@ def read_frontmatter_version(path, rel):
             # top-level key that closes the block (review round 4).
             continue
         if not line[:1].isspace():
+            if ALT_METADATA_KEY_RE.match(line):
+                key = line.split(":", 1)[0].rstrip()
+                return None, [(rel,
+                    f"a metadata key must be spelled exactly 'metadata:'; "
+                    f"found {key!r}, which YAML reads as the same key and "
+                    "which slips past the duplicate guard, rewrite it")]
             head, sep, rest = line.partition(":")
             if head.strip() == "metadata" and sep:
                 rest = rest.split(" #")[0].strip()
