@@ -183,6 +183,45 @@ class CheckVersionsCase(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("skills/sepia/SKILL.md: required", report)
 
+    def test_duplicate_version_keys_are_invalid_not_first_wins(self):
+        # Issue #39: with a stale first key matching the manifests, first-wins
+        # passed while a duplicate-tolerant YAML parser would take the LAST
+        # value. Duplicates are an error, never a pick.
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ["name: sepia", "metadata:", '  version: "0.4.0"', '  version: "9.9.9"']
+                )
+            }
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("declares version 2 times", report)
+
+    def test_duplicate_version_keys_with_equal_values_are_still_invalid(self):
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ["name: sepia", "metadata:", '  version: "0.4.0"', '  version: "0.4.0"']
+                )
+            }
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("declares version 2 times", report)
+
+    def test_two_metadata_blocks_each_declaring_a_version_are_invalid(self):
+        # A duplicated metadata key with a version in each block is the same
+        # ambiguity one level up; the count spans the whole frontmatter.
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ["name: sepia", "metadata:", '  version: "0.4.0"',
+                     "license: MIT", "metadata:", '  version: "9.9.9"']
+                )
+            }
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("declares version 2 times", report)
+
     def test_a_utf8_bom_before_the_frontmatter_is_tolerated(self):
         # Editors on Windows add a BOM; real frontmatter loaders tolerate it.
         # Exact-line delimiter matching must not turn an invisible byte into

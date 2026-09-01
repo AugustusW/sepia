@@ -144,7 +144,10 @@ def read_frontmatter_version(path, rel):
     `metadata:` counts. Inline metadata (flow mappings, scalars) is refused
     with instructions to use block style: two review rounds of quoted-span and
     nested-brace edge cases traced back to hand-parsing flow, and the refusal
-    is loud and names its own fix. A line scan rather than a YAML parser, carrying two pieces of
+    is loud and names its own fix. Declaring version more than once is an
+    error, not a first-wins pick: duplicate-tolerant YAML parsers commonly
+    keep the last value, so picking the first can pass on a stale one
+    (issue #39). A line scan rather than a YAML parser, carrying two pieces of
     state: entering the frontmatter's `metadata:` key opens the block and the
     next top-level key closes it, and the block's first child fixes the
     indentation that direct children must sit at. Anything deeper belongs to a
@@ -177,6 +180,7 @@ def read_frontmatter_version(path, rel):
 
     in_metadata = False
     child_indent = None
+    declared = []
     for line in lines[1:close]:
         if not line.strip():
             continue
@@ -213,7 +217,18 @@ def read_frontmatter_version(path, rel):
             continue
         stripped = line.strip()
         if stripped.startswith("version:"):
-            return _frontmatter_scalar(stripped[len("version:"):], rel)
+            declared.append(stripped[len("version:"):])
+    if len(declared) > 1:
+        # Returning on the first key would keep a stale value alive: YAML
+        # parsers that tolerate duplicate mapping keys commonly retain the
+        # LAST one, so first-wins can agree with the manifests while the
+        # effective version differs. Present-but-wrong, so it is an error,
+        # never a pick (issue #39).
+        return None, [(rel,
+            f"metadata declares version {len(declared)} times; duplicate "
+            "keys are invalid, keep exactly one")]
+    if declared:
+        return _frontmatter_scalar(declared[0], rel)
     return None, []
 
 
