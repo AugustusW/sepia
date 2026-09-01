@@ -183,6 +183,33 @@ class CheckVersionsCase(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("skills/sepia/SKILL.md: required", report)
 
+    def test_a_utf8_bom_before_the_frontmatter_is_tolerated(self):
+        # Editors on Windows add a BOM; real frontmatter loaders tolerate it.
+        # Exact-line delimiter matching must not turn an invisible byte into
+        # a red required check.
+        content = "\ufeff" + skill_md(["name: sepia", "metadata:", '  version: "0.4.0"'])
+        code, report = self.run_check({"skills/sepia/SKILL.md": content})
+        self.assertEqual(code, 0)
+        self.assertIn("3 declarations, all 0.4.0", report)
+
+    def test_a_corrupted_opening_delimiter_means_no_frontmatter(self):
+        # Review round 7: ---oops is not a frontmatter opener, but prefix
+        # matching accepted it, so the guard stayed green after the
+        # declaration was broken. A real YAML loader sees no frontmatter
+        # here; so must the scanner, and the required core then goes red.
+        content = "---oops\nname: sepia\nmetadata:\n  version: \"0.4.0\"\n---\n\n# sepia\n"
+        code, report = self.run_check({"skills/sepia/SKILL.md": content})
+        self.assertEqual(code, 1)
+        self.assertIn("skills/sepia/SKILL.md: required", report)
+
+    def test_a_corrupted_closing_delimiter_means_no_frontmatter(self):
+        # ---- is not a closing delimiter; without an exact --- line the
+        # block is unterminated and declares nothing.
+        content = "---\nname: sepia\nmetadata:\n  version: \"0.4.0\"\n----\n\n# sepia\n"
+        code, report = self.run_check({"skills/sepia/SKILL.md": content})
+        self.assertEqual(code, 1)
+        self.assertIn("skills/sepia/SKILL.md: required", report)
+
     def test_a_blank_line_inside_metadata_does_not_close_the_block(self):
         code, report = self.run_check(
             {

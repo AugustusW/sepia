@@ -158,15 +158,26 @@ def read_frontmatter_version(path, rel):
     except OSError as exc:
         return None, [(rel, f"unreadable: {exc}")]
 
-    if not text.startswith("---"):
+    # An editor-added UTF-8 BOM is invisible and tolerated by real
+    # frontmatter loaders; without stripping it the first line reads as
+    # \ufeff--- and a valid required file goes red on an invisible byte.
+    if text.startswith("\ufeff"):
+        text = text[1:]
+
+    # Delimiters must be exactly --- as whole lines. Prefix matching let
+    # ---oops open and ---- close a "frontmatter" that a real YAML loader
+    # would refuse, keeping the required-core guard green after the
+    # declaration was broken (review round 7).
+    lines = text.splitlines()
+    if not lines or lines[0].rstrip() != "---":
         return None, []
-    end = text.find("\n---", 3)
-    if end == -1:
+    close = next((i for i in range(1, len(lines)) if lines[i].rstrip() == "---"), None)
+    if close is None:
         return None, []
 
     in_metadata = False
     child_indent = None
-    for line in text[3:end].splitlines():
+    for line in lines[1:close]:
         if not line.strip():
             continue
         if line.lstrip().startswith("#"):
