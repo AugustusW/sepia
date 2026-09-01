@@ -208,6 +208,44 @@ class CheckVersionsCase(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("declares version 2 times", report)
 
+    def test_alternate_spellings_of_the_version_key_are_invalid(self):
+        # Review on PR #41: "version": / 'version': / version : resolve to the
+        # same key in YAML (Psych keeps the last value), so an alternate
+        # spelling slipped past the duplicate counter, one stale exact key
+        # plus one alternate-spelled new value read as a single declaration.
+        # Spelling is restricted rather than parsed.
+        for line in ('"version": "9.9.9"', "'version': \"9.9.9\"", 'version : "9.9.9"'):
+            code, report = self.run_check(
+                {
+                    "skills/sepia/SKILL.md": skill_md(
+                        ["name: sepia", "metadata:", '  version: "0.4.0"', f"  {line}"]
+                    )
+                }
+            )
+            self.assertEqual(code, 1, f"{line} should be invalid")
+            self.assertIn("spelled exactly", report)
+
+    def test_an_alternate_spelling_alone_is_also_invalid(self):
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ["name: sepia", "metadata:", '  "version": "0.4.0"']
+                )
+            }
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("spelled exactly", report)
+
+    def test_other_quoted_keys_at_child_level_are_not_flagged(self):
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ["name: sepia", "metadata:", '  "author": "x"', '  version: "0.4.0"']
+                )
+            }
+        )
+        self.assertEqual(code, 0)
+
     def test_two_metadata_blocks_each_declaring_a_version_are_invalid(self):
         # A duplicated metadata key with a version in each block is the same
         # ambiguity one level up; the count spans the whole frontmatter.

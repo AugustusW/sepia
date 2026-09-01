@@ -60,6 +60,15 @@ REQUIRED = (
     "skills/sepia/SKILL.md",
 )
 
+# A direct-child key that a YAML parser would resolve to `version` under a
+# spelling other than exactly `version:` — a quoted key, or whitespace before
+# the colon. Ruby Psych reads these as the same key and keeps the last value,
+# so an alternate spelling slips past the duplicate guard: one stale exact key
+# plus one alternate-spelled new value reads as a single, stale declaration.
+# Per review the spelling is restricted rather than parsed: the set is closed,
+# but the restriction is smaller and keeps the scanner a scanner.
+ALT_VERSION_KEY_RE = re.compile(r"""^(?:(["'])version\1|version\s)\s*:""")
+
 
 def _iter_files(root):
     for path in sorted(root.rglob("*")):
@@ -218,6 +227,12 @@ def read_frontmatter_version(path, rel):
         stripped = line.strip()
         if stripped.startswith("version:"):
             declared.append(stripped[len("version:"):])
+        elif ALT_VERSION_KEY_RE.match(stripped):
+            key = stripped.split(":", 1)[0].rstrip()
+            return None, [(rel,
+                f"a version key must be spelled exactly 'version:'; found "
+                f"{key!r}, which YAML reads as the same key and which slips "
+                "past the duplicate guard, rewrite it")]
     if len(declared) > 1:
         # Returning on the first key would keep a stale value alive: YAML
         # parsers that tolerate duplicate mapping keys commonly retain the
