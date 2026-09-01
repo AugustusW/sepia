@@ -151,6 +151,49 @@ class CheckVersionsCase(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertNotIn("9.9.9", report)
 
+    def test_a_nested_version_inside_metadata_is_not_the_skill_version(self):
+        # Review case, round two: metadata.compatibility.version must not
+        # shadow metadata's own direct child. Only the direct child counts.
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    [
+                        "name: sepia",
+                        "metadata:",
+                        "  compatibility:",
+                        '    version: "9.9.9"',
+                        '  version: "0.4.0"',
+                    ]
+                )
+            }
+        )
+        self.assertEqual(code, 0)
+        self.assertNotIn("9.9.9", report)
+
+    def test_only_a_nested_version_means_the_skill_declares_none(self):
+        # With nothing but metadata.compatibility.version, the skill declares
+        # no version of its own, and since it is required that fails.
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ["name: sepia", "metadata:", "  compatibility:", '    version: "9.9.9"']
+                )
+            }
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("skills/sepia/SKILL.md: required", report)
+
+    def test_a_blank_line_inside_metadata_does_not_close_the_block(self):
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ["name: sepia", "metadata:", "", '  version: "0.4.0"']
+                )
+            }
+        )
+        self.assertEqual(code, 0)
+        self.assertIn("3 declarations, all 0.4.0", report)
+
     def test_an_empty_metadata_version_fails(self):
         code, report = self.run_check(
             {

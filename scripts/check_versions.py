@@ -107,11 +107,15 @@ def read_json_versions(path, rel):
 def read_frontmatter_version(path, rel):
     """(version_or_None, invalid) for one SKILL.md.
 
-    Only `version:` inside the top-level `metadata:` block counts. A line scan
-    with one bit of state rather than a YAML parser: entering the frontmatter's
-    `metadata:` key sets it, the next top-level key clears it. Anything else
-    named version elsewhere in the frontmatter (say `compatibility.version`)
-    belongs to that other key, not to the skill.
+    Only a `version:` that is a DIRECT child of the top-level `metadata:` block
+    counts. A line scan rather than a YAML parser, carrying two pieces of
+    state: entering the frontmatter's `metadata:` key opens the block and the
+    next top-level key closes it, and the block's first child fixes the
+    indentation that direct children must sit at. Anything deeper belongs to a
+    nested key (say `metadata.compatibility.version`) and anything named
+    version under some other top-level key belongs to that key, so neither is
+    the skill's version. Blank lines carry no structure and are skipped rather
+    than being mistaken for a top-level key.
     """
     try:
         text = path.read_text(encoding="utf-8")
@@ -125,17 +129,27 @@ def read_frontmatter_version(path, rel):
         return None, []
 
     in_metadata = False
+    child_indent = None
     for line in text[3:end].splitlines():
+        if not line.strip():
+            continue
         if not line[:1].isspace():
             in_metadata = line.rstrip() == "metadata:"
+            child_indent = None
             continue
-        if in_metadata:
-            stripped = line.strip()
-            if stripped.startswith("version:"):
-                raw = stripped[len("version:"):].split(" #")[0].strip().strip("\"'")
-                if raw:
-                    return raw, []
-                return None, [(rel, "metadata.version is present but empty")]
+        if not in_metadata:
+            continue
+        indent = len(line) - len(line.lstrip())
+        if child_indent is None:
+            child_indent = indent
+        if indent != child_indent:
+            continue
+        stripped = line.strip()
+        if stripped.startswith("version:"):
+            raw = stripped[len("version:"):].split(" #")[0].strip().strip("\"'")
+            if raw:
+                return raw, []
+            return None, [(rel, "metadata.version is present but empty")]
     return None, []
 
 
