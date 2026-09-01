@@ -1,0 +1,55 @@
+name: behavioral eval
+
+# Runs `claude plugin eval` against the plugin's evals/ suite: each case is a
+# prompt run in an isolated session with only this plugin loaded, scored by its
+# graders, plus a no-plugin baseline arm for the score delta.
+#
+# Push-to-main only (plus manual dispatch): the run spends the maintainer's
+# Claude subscription quota via CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`),
+# so it must never trigger on fork PRs. CLAUDE_CODE_WALNUT_SPIRE enables the
+# early-access `plugin eval` command on machines that cannot receive the
+# per-organization rollout — CI runners are its documented audience.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - skills/**
+      - evals/**
+      - plugin.json
+      - .claude-plugin/**
+      - .github/workflows/behavioral-eval.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      CLAUDE_CODE_WALNUT_SPIRE: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: install claude code
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: run behavioral eval
+        # --model pinned so a model rollout does not read as a plugin
+        # regression; judge stays the default (haiku). Threshold 0.7 tolerates
+        # one noisy judge vote without letting a broken skill pass.
+        run: |
+          claude plugin eval . --json results.json --threshold 0.7 \
+            --model claude-sonnet-5 --no-publish
+      - name: summarize
+        if: always()
+        run: |
+          [ -f results.json ] || { echo "no results.json produced"; exit 0; }
+          jq -r '.cases[] | .name as $c | .arms | to_entries[] |
+            "\($c) [\(.key)] score=" +
+            ((([.value[].score] | add / length * 100 | round) / 100) | tostring)' results.json
+          jq -r '.cases[].arms.with[].graders[] |
+            "  \(.name): passed=\(.passed) scored=\(.scored // true)"' results.json
