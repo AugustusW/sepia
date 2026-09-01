@@ -37,6 +37,7 @@ Exit status is 0 when every declaration agrees and the required files all
 declare, 1 otherwise. The unit tests live in tests/test_check_versions.py.
 """
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -104,6 +105,36 @@ def read_json_versions(path, rel):
     return declared, invalid
 
 
+def _flow_metadata_version(rest, rel):
+    """The direct-child version of a flow-style `metadata: {...}` value.
+
+    Direct-child semantics are kept by deleting innermost `{...}` groups until
+    none remain: whatever survives is metadata's own level, and a version that
+    lived inside `compatibility: {...}` is gone before the scan. Values with
+    braces inside quoted strings are beyond a line scanner; if the braces do
+    not reduce cleanly the file is reported rather than guessed at.
+    """
+    if not (rest.startswith("{") and rest.endswith("}")):
+        return None, [(rel, f"metadata is {rest!r}, neither a block nor a {{...}} flow mapping")]
+
+    inner = rest[1:-1]
+    while True:
+        reduced = re.sub(r"\{[^{}]*\}", "", inner)
+        if reduced == inner:
+            break
+        inner = reduced
+    if "{" in inner or "}" in inner:
+        return None, [(rel, "metadata flow mapping has unbalanced braces; use block style")]
+
+    match = re.search(r"(?:^|,)\s*version:\s*([^,]*)", inner)
+    if not match:
+        return None, []
+    raw = match.group(1).strip().strip("\"'")
+    if raw:
+        return raw, []
+    return None, [(rel, "metadata.version is present but empty")]
+
+
 def read_frontmatter_version(path, rel):
     """(version_or_None, invalid) for one SKILL.md.
 
@@ -134,7 +165,17 @@ def read_frontmatter_version(path, rel):
         if not line.strip():
             continue
         if not line[:1].isspace():
-            in_metadata = line.rstrip() == "metadata:"
+            head, sep, rest = line.partition(":")
+            if head.strip() == "metadata" and sep:
+                rest = rest.split(" #")[0].strip()
+                if rest:
+                    # Flow syntax: metadata: {version: "0.4.0", ...}. Valid
+                    # YAML, and a formatter may produce it, so a version here
+                    # must be found rather than reported missing.
+                    return _flow_metadata_version(rest, rel)
+                in_metadata = True
+            else:
+                in_metadata = False
             child_indent = None
             continue
         if not in_metadata:

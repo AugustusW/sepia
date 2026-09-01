@@ -194,6 +194,56 @@ class CheckVersionsCase(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("3 declarations, all 0.4.0", report)
 
+    # --- flow-style metadata ------------------------------------------------
+
+    def test_flow_style_metadata_is_read_not_reported_missing(self):
+        # Review case, round three: metadata: {version: "0.4.0"} is valid YAML
+        # that a formatter may produce. It must be read, not failed as a
+        # missing required declaration.
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ["name: sepia", 'metadata: {version: "0.4.0"}']
+                )
+            }
+        )
+        self.assertEqual(code, 0)
+        self.assertIn("3 declarations, all 0.4.0", report)
+
+    def test_flow_style_keeps_direct_child_semantics(self):
+        # A version nested inside a flow compatibility mapping is not the
+        # skill's version; the direct child next to it is.
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    [
+                        "name: sepia",
+                        'metadata: {compatibility: {version: "9.9.9"}, version: "0.4.0"}',
+                    ]
+                )
+            }
+        )
+        self.assertEqual(code, 0)
+        self.assertNotIn("9.9.9", report)
+
+    def test_flow_style_with_only_a_nested_version_declares_none(self):
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ["name: sepia", 'metadata: {compatibility: {version: "9.9.9"}}']
+                )
+            }
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("skills/sepia/SKILL.md: required", report)
+
+    def test_a_scalar_metadata_value_is_reported_not_guessed_at(self):
+        code, report = self.run_check(
+            {"skills/sepia/SKILL.md": skill_md(["name: sepia", "metadata: oops"])}
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("neither a block nor a", report)
+
     def test_an_empty_metadata_version_fails(self):
         code, report = self.run_check(
             {
