@@ -10,23 +10,33 @@ when one manifest is a version behind; the wrong number just gets advertised,
 and a version number is exactly the claim a reader uses to judge whether a
 project is still maintained.
 
-Discovery rather than a fixed list, so the guard grows with the repository.
-The packaging surface has already grown once, with the Antigravity manifest in
-Nanako0129/sepia#14, and the root plugin.json and both marketplace.json files
-carry no version today. If any of them gains one later, it is checked from that
-moment without anyone remembering to add it here. Files with no version are
-reported, not failed: absent is a legitimate state, and printing them is how a
-maintainer sees what the scan actually looked at.
+Two rules, covering the two ways this can rot:
+
+1. Discovery. Any file named plugin.json or marketplace.json is read wherever
+   it sits, for a top-level `version` and for one on each entry of a `plugins`
+   array, and every SKILL.md's frontmatter is read for `metadata.version`. A
+   manifest that gains a version later is checked from that moment. A `version`
+   key that exists but is not a non-empty string fails: a field someone edited
+   into a number or an empty value is a mistake, not an absence.
+
+2. A required core. The three files that declare the version today must keep
+   declaring it. Without this, deleting one of them would just shrink the
+   agreeing set and the check would stay green, which is precisely the silent
+   failure it exists to catch.
+
+Files that declare nothing and are not required are listed, not failed: absent
+is a legitimate state there, and printing them keeps the scan's reach visible.
+Discovery finding nothing at all is likewise a failure, not a pass.
 
 Standard library only, by design. The repository has no lockfiles and this
 should not be the reason it gets one.
 
     python3 scripts/check_versions.py
 
-Exit status is 0 when every declaration agrees, 1 otherwise.
+Exit status is 0 when every declaration agrees and the required files all
+declare, 1 otherwise. The unit tests live in tests/test_check_versions.py.
 """
 import json
-import re
 import sys
 from pathlib import Path
 
@@ -39,14 +49,15 @@ SKIP_DIRS = {".git", "node_modules", ".venv", "venv", "__pycache__", ".mypy_cach
 # it sits. That is the point: a manifest added in a new directory is found.
 MANIFEST_NAMES = {"plugin.json", "marketplace.json"}
 
-# A skill declares its version in YAML frontmatter, under `metadata`. Parsed by
-# hand rather than with PyYAML to keep the dependency count at zero; the shape
-# is fixed and simple enough that a line scan is honest here.
-FRONTMATTER_VERSION_RE = re.compile(r"^\s+version:\s*[\"']?([^\"'\s]+)[\"']?\s*$", re.M)
-
-
-class ManifestError(Exception):
-    """A file that should have been readable was not."""
+# The files that carry the version today. Discovery still scans everything;
+# these additionally MUST declare one, so a deleted or mistyped field fails
+# instead of quietly shrinking the agreeing set. When the layout changes on
+# purpose, change this list in the same commit.
+REQUIRED = (
+    ".claude-plugin/plugin.json",
+    ".codex-plugin/plugin.json",
+    "skills/sepia/SKILL.md",
+)
 
 
 def _iter_files(root):
@@ -58,71 +69,144 @@ def _iter_files(root):
         yield path
 
 
-def _rel(path):
-    return str(path.relative_to(ROOT))
+def _valid(value):
+    return isinstance(value, str) and value.strip() != ""
 
 
-def read_json_versions(path):
-    """Every version a JSON manifest declares, as (label, version) pairs.
+def read_json_versions(path, rel):
+    """(declared, invalid) for one JSON manifest.
 
-    Both shapes are covered: a top-level `version`, and a `version` on each
-    entry of a `plugins` array, which is where a marketplace file would put it.
+    declared: [(label, version)] for every well-formed declaration.
+    invalid:  [(label, reason)] for every `version` key that exists but is not
+              a non-empty string. Present-but-wrong is an error, never an
+              absence: treating it as absence is how a deleted or mistyped
+              field slips through.
     """
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        raise ManifestError(f"{_rel(path)}: {exc}") from exc
+        return [], [(rel, f"unreadable: {exc}")]
 
-    found = []
+    declared, invalid = [], []
     if isinstance(data, dict):
-        if isinstance(data.get("version"), str):
-            found.append((_rel(path), data["version"]))
+        if "version" in data:
+            if _valid(data["version"]):
+                declared.append((rel, data["version"].strip()))
+            else:
+                invalid.append((rel, f"version is {data['version']!r}, not a non-empty string"))
         for index, entry in enumerate(data.get("plugins") or []):
-            if isinstance(entry, dict) and isinstance(entry.get("version"), str):
-                found.append((f"{_rel(path)} → plugins[{index}]", entry["version"]))
-    return found
+            if isinstance(entry, dict) and "version" in entry:
+                label = f"{rel} → plugins[{index}]"
+                if _valid(entry["version"]):
+                    declared.append((label, entry["version"].strip()))
+                else:
+                    invalid.append((label, f"version is {entry['version']!r}, not a non-empty string"))
+    return declared, invalid
 
 
-def read_frontmatter_version(path):
-    """The version in a SKILL.md's frontmatter, or None if it declares none."""
+def read_frontmatter_version(path, rel):
+    """(version_or_None, invalid) for one SKILL.md.
+
+    Only `version:` inside the top-level `metadata:` block counts. A line scan
+    with one bit of state rather than a YAML parser: entering the frontmatter's
+    `metadata:` key sets it, the next top-level key clears it. Anything else
+    named version elsewhere in the frontmatter (say `compatibility.version`)
+    belongs to that other key, not to the skill.
+    """
     try:
         text = path.read_text(encoding="utf-8")
     except OSError as exc:
-        raise ManifestError(f"{_rel(path)}: {exc}") from exc
+        return None, [(rel, f"unreadable: {exc}")]
 
     if not text.startswith("---"):
-        return None
+        return None, []
     end = text.find("\n---", 3)
     if end == -1:
-        return None
-    match = FRONTMATTER_VERSION_RE.search(text[3:end])
-    return match.group(1) if match else None
+        return None, []
+
+    in_metadata = False
+    for line in text[3:end].splitlines():
+        if not line[:1].isspace():
+            in_metadata = line.rstrip() == "metadata:"
+            continue
+        if in_metadata:
+            stripped = line.strip()
+            if stripped.startswith("version:"):
+                raw = stripped[len("version:"):].split(" #")[0].strip().strip("\"'")
+                if raw:
+                    return raw, []
+                return None, [(rel, "metadata.version is present but empty")]
+    return None, []
 
 
 def scan(root):
-    """Walk the repository once. Returns (declared, silent).
-
-    declared: [(label, version)] for everything that states a version.
-    silent:   [label] for manifests and skills that state none, which is fine
-              and is printed so the scan's reach stays visible.
-    """
-    declared, silent = [], []
+    """Walk the repository once. Returns (declared, silent, invalid)."""
+    declared, silent, invalid = [], [], []
 
     for path in _iter_files(root):
+        rel = path.relative_to(root).as_posix()  # forward slashes on Windows too
         if path.name in MANIFEST_NAMES:
-            versions = read_json_versions(path)
-            if versions:
-                declared.extend(versions)
-            else:
-                silent.append(_rel(path))
+            found, bad = read_json_versions(path, rel)
+            invalid.extend(bad)
+            if found:
+                declared.extend(found)
+            elif not bad:
+                silent.append(rel)
         elif path.name == "SKILL.md":
-            version = read_frontmatter_version(path)
+            version, bad = read_frontmatter_version(path, rel)
+            invalid.extend(bad)
             if version:
-                declared.append((_rel(path), version))
-            else:
-                silent.append(_rel(path))
+                declared.append((rel, version))
+            elif not bad:
+                silent.append(rel)
 
-    return declared, silent
+    return declared, silent, invalid
+
+
+def run(root, required=REQUIRED):
+    """The whole check, as (exit_code, report_text). main() just prints it."""
+    declared, silent, invalid = scan(root)
+    lines, failures = [], []
+
+    labels = [label for label, _ in declared]
+    width = max((len(label) for label in labels + silent), default=0)
+    for label, version in declared:
+        lines.append(f"  {label.ljust(width)}  {version}")
+    for label in silent:
+        lines.append(f"  {label.ljust(width)}  (no version declared)")
+
+    for label, reason in invalid:
+        failures.append(f"{label}: {reason}")
+
+    for rel in required:
+        if rel not in labels:
+            failures.append(
+                f"{rel}: required to declare a version and does not. If the layout "
+                "changed on purpose, update REQUIRED in scripts/check_versions.py."
+            )
+
+    if not declared and not failures:
+        failures.append(
+            "no file declares a version. Either the manifests moved or this "
+            "script's discovery is out of date."
+        )
+
+    versions = {version for _, version in declared}
+    if len(versions) > 1:
+        failures.append(
+            f"{len(versions)} different versions declared: {', '.join(sorted(versions))}. "
+            "Every file that states a version must state the same one."
+        )
+
+    if failures:
+        lines.append("")
+        lines.append("version check: FAILED")
+        lines.extend(f"  - {failure}" for failure in failures)
+        return 1, "\n".join(lines)
+
+    lines.append("")
+    lines.append(f"version check: OK, {len(declared)} declarations, all {versions.pop()}.")
+    return 0, "\n".join(lines)
 
 
 def main(argv=None):
@@ -134,42 +218,9 @@ def main(argv=None):
         print(f"version check: takes no arguments, got {' '.join(argv)}", file=sys.stderr)
         return 2
 
-    try:
-        declared, silent = scan(ROOT)
-    except ManifestError as exc:
-        print(f"version check: unreadable manifest: {exc}", file=sys.stderr)
-        return 1
-
-    width = max((len(label) for label in [l for l, _ in declared] + silent), default=0)
-    for label, version in declared:
-        print(f"  {label.ljust(width)}  {version}")
-    for label in silent:
-        print(f"  {label.ljust(width)}  (no version declared)")
-
-    if not declared:
-        # Not a pass. Discovery finding nothing means the layout moved and this
-        # guard stopped guarding, which is the one failure it cannot report as
-        # a mismatch.
-        print(
-            "\nversion check: FAILED, no file declares a version.\n"
-            "Either the manifests moved or this script's discovery is out of date.",
-            file=sys.stderr,
-        )
-        return 1
-
-    versions = {version for _, version in declared}
-    if len(versions) > 1:
-        print(
-            f"\nversion check: FAILED, {len(versions)} different versions declared: "
-            f"{', '.join(sorted(versions))}.\n"
-            "Every file above that states a version must state the same one.",
-            file=sys.stderr,
-        )
-        return 1
-
-    only = versions.pop()
-    print(f"\nversion check: OK, {len(declared)} declarations, all {only}.")
-    return 0
+    code, report = run(ROOT)
+    print(report, file=sys.stderr if code else sys.stdout)
+    return code
 
 
 if __name__ == "__main__":
