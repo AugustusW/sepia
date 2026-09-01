@@ -37,6 +37,22 @@ jobs:
         run: |
           curl -fsSL https://claude.ai/install.sh | bash
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: materialize claude.ai credentials
+        # The eval sandbox authenticates each run's child by copying the
+        # parent's credentials file (~/.claude/.credentials.json on Linux)
+        # into the run's fresh config dir. CLAUDE_CODE_OAUTH_TOKEN is not on
+        # the sandbox's env pass-through list (only ANTHROPIC_API_KEY-style
+        # env auth is), so on a runner that never ran `claude login` the
+        # child was rejected at the first run (partialReason auth_failed,
+        # observed twice). Write the file a real login would have left,
+        # from the same token. expiresAt is only metadata here — the
+        # setup-token itself carries the real expiry.
+        run: |
+          umask 077
+          mkdir -p "$HOME/.claude"
+          EXPIRES=$(( ($(date +%s) + 250*24*3600) * 1000 ))
+          printf '{"claudeAiOauth":{"accessToken":"%s","refreshToken":"","expiresAt":%s,"scopes":["user:inference"]}}' \
+            "$CLAUDE_CODE_OAUTH_TOKEN" "$EXPIRES" > "$HOME/.claude/.credentials.json"
       - name: run behavioral eval
         # --model pinned so a model rollout does not read as a plugin
         # regression; judge stays the default (haiku). Threshold 0.7 tolerates
@@ -48,6 +64,9 @@ jobs:
         if: always()
         run: |
           [ -f results.json ] || { echo "no results.json produced"; exit 0; }
+          jq -r '"partial=\(.partial // false) reason=\(.partialReason // "none")"' results.json
+          jq -r '.cases[].arms | to_entries[] | .key as $a | .value[] |
+            select(.error != null) | "  [\($a)] run error: \(.error)"' results.json
           jq -r '.cases[] | .name as $c | .arms | to_entries[] |
             "\($c) [\(.key)] score=" +
             ((([.value[].score] | add / length * 100 | round) / 100) | tostring)' results.json
