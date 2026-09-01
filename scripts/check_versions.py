@@ -76,6 +76,16 @@ ALT_VERSION_KEY_RE = re.compile(r"""^(?:(["'])version\1|version\s)\s*:""")
 # so only the first exact-spelling block was counted (review on PR #41).
 ALT_METADATA_KEY_RE = re.compile(r"""^(?:(["'])metadata\1|metadata\s)\s*:""")
 
+# The closing rule for the whole spelling family: a mapping key at either
+# scanned level must be a PLAIN scalar. Double-quoted keys process escapes
+# ("metadata": resolves to metadata in Psych, verified), tags, aliases
+# and explicit-key syntax likewise reach the same key through other doors,
+# and a scanner cannot know a nonplain key's parsed name without becoming a
+# YAML parser. Plain scalars are verbatim (metadata: stays literal,
+# verified against Psych), so refusing every nonplain key form closes the
+# escape channel outright instead of chasing spellings through it.
+NONPLAIN_KEY_RE = re.compile(r"""^["'?&*!]""")
+
 
 def _iter_files(root):
     for path in sorted(root.rglob("*")):
@@ -206,6 +216,12 @@ def read_frontmatter_version(path, rel):
             # top-level key that closes the block (review round 4).
             continue
         if not line[:1].isspace():
+            if NONPLAIN_KEY_RE.match(line):
+                return None, [(rel,
+                    "a top-level frontmatter key here must be a plain scalar "
+                    f"(found {line.split(':', 1)[0].rstrip()!r}); quoted, "
+                    "tagged, aliased or explicit keys can resolve to "
+                    "'metadata' through escapes, write plain keys exactly")]
             if ALT_METADATA_KEY_RE.match(line):
                 key = line.split(":", 1)[0].rstrip()
                 return None, [(rel,
@@ -238,6 +254,12 @@ def read_frontmatter_version(path, rel):
         if indent != child_indent:
             continue
         stripped = line.strip()
+        if NONPLAIN_KEY_RE.match(stripped):
+            return None, [(rel,
+                "a metadata child key must be a plain scalar (found "
+                f"{stripped.split(':', 1)[0].rstrip()!r}); quoted, tagged, "
+                "aliased or explicit keys can resolve to 'version' through "
+                "escapes, write plain keys exactly")]
         if stripped.startswith("version:"):
             declared.append(stripped[len("version:"):])
         elif ALT_VERSION_KEY_RE.match(stripped):

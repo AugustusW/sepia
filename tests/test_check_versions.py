@@ -213,7 +213,14 @@ class CheckVersionsCase(unittest.TestCase):
         # the same key in YAML, but the equality check read it as a different
         # key and closed the block, so a stale exact-spelling block passed
         # while the quoted block held the effective newer version.
-        for opener in ('"metadata":', "'metadata':", 'metadata :'):
+        # Quoted spellings hit the nonplain-key rule (they could hide any
+        # escape); the whitespace spelling is a plain key and gets the
+        # targeted spelled-exactly message.
+        for opener, marker in (
+            ('"metadata":', "plain scalar"),
+            ("'metadata':", "plain scalar"),
+            ("metadata :", "spelled exactly 'metadata:'"),
+        ):
             code, report = self.run_check(
                 {
                     "skills/sepia/SKILL.md": skill_md(
@@ -223,7 +230,7 @@ class CheckVersionsCase(unittest.TestCase):
                 }
             )
             self.assertEqual(code, 1, f"{opener} should be invalid")
-            self.assertIn("spelled exactly 'metadata:'", report)
+            self.assertIn(marker, report)
 
     def test_a_lone_alternate_metadata_spelling_is_also_invalid(self):
         code, report = self.run_check(
@@ -234,17 +241,23 @@ class CheckVersionsCase(unittest.TestCase):
             }
         )
         self.assertEqual(code, 1)
-        self.assertIn("spelled exactly 'metadata:'", report)
+        self.assertIn("plain scalar", report)
 
-    def test_other_quoted_top_level_keys_are_not_flagged(self):
-        code, report = self.run_check(
-            {
-                "skills/sepia/SKILL.md": skill_md(
-                    ['"author": x', "name: sepia", "metadata:", '  version: "0.4.0"']
-                )
-            }
-        )
-        self.assertEqual(code, 0)
+    def test_any_nonplain_top_level_key_is_invalid(self):
+        # Flipped from "other quoted keys are not flagged": "meta\u0064ata":
+        # resolves to metadata through double-quote escapes (verified against
+        # Psych), so a scanner cannot know any nonplain key's parsed name.
+        # Plain keys are verbatim; every nonplain form is refused.
+        for line in ('"author": x', '"meta\\u0064ata":', "!!str metadata: 1", "? metadata"):
+            code, report = self.run_check(
+                {
+                    "skills/sepia/SKILL.md": skill_md(
+                        ["name: sepia", "metadata:", '  version: "0.4.0"', line]
+                    )
+                }
+            )
+            self.assertEqual(code, 1, f"{line} should be invalid")
+            self.assertIn("plain scalar", report)
 
     def test_alternate_spellings_of_the_version_key_are_invalid(self):
         # Review on PR #41: "version": / 'version': / version : resolve to the
@@ -252,7 +265,11 @@ class CheckVersionsCase(unittest.TestCase):
         # spelling slipped past the duplicate counter, one stale exact key
         # plus one alternate-spelled new value read as a single declaration.
         # Spelling is restricted rather than parsed.
-        for line in ('"version": "9.9.9"', "'version': \"9.9.9\"", 'version : "9.9.9"'):
+        for line, marker in (
+            ('"version": "9.9.9"', "plain scalar"),
+            ("'version': \"9.9.9\"", "plain scalar"),
+            ('version : "9.9.9"', "spelled exactly"),
+        ):
             code, report = self.run_check(
                 {
                     "skills/sepia/SKILL.md": skill_md(
@@ -261,7 +278,7 @@ class CheckVersionsCase(unittest.TestCase):
                 }
             )
             self.assertEqual(code, 1, f"{line} should be invalid")
-            self.assertIn("spelled exactly", report)
+            self.assertIn(marker, report)
 
     def test_an_alternate_spelling_alone_is_also_invalid(self):
         code, report = self.run_check(
@@ -272,17 +289,22 @@ class CheckVersionsCase(unittest.TestCase):
             }
         )
         self.assertEqual(code, 1)
-        self.assertIn("spelled exactly", report)
+        self.assertIn("plain scalar", report)
 
-    def test_other_quoted_keys_at_child_level_are_not_flagged(self):
-        code, report = self.run_check(
-            {
-                "skills/sepia/SKILL.md": skill_md(
-                    ["name: sepia", "metadata:", '  "author": "x"', '  version: "0.4.0"']
-                )
-            }
-        )
-        self.assertEqual(code, 0)
+    def test_any_nonplain_metadata_child_key_is_invalid(self):
+        # Same closure one level down, found by applying the rule ourselves
+        # rather than waiting for the next round: "vers\u0069on": inside the
+        # block slipped past the version spelling guard the same way.
+        for line in ('  "author": "x"', '  "vers\\u0069on": "9.9.9"'):
+            code, report = self.run_check(
+                {
+                    "skills/sepia/SKILL.md": skill_md(
+                        ["name: sepia", "metadata:", '  version: "0.4.0"', line]
+                    )
+                }
+            )
+            self.assertEqual(code, 1, f"{line} should be invalid")
+            self.assertIn("plain scalar", report)
 
     def test_two_metadata_blocks_each_declaring_a_version_are_invalid(self):
         # A duplicated metadata key with a version in each block is the same
