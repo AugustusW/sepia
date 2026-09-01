@@ -229,21 +229,13 @@ class CheckVersionsCase(unittest.TestCase):
         )
         self.assertEqual(code, 0)
 
-    def test_an_unquoted_numeric_version_is_rejected_with_quote_instructions(self):
-        # YAML reads version: 1.0 as a number; the scanner stays a scanner and
-        # rejects it rather than implementing YAML typing.
-        code, report = self.run_check(
-            {
-                "skills/sepia/SKILL.md": skill_md(
-                    ["name: sepia", "metadata:", "  version: 1.0"]
-                )
-            }
-        )
-        self.assertEqual(code, 1)
-        self.assertIn("quote it", report)
-
-    def test_unquoted_booleans_and_nulls_are_rejected_too(self):
-        for value in ("true", "null", "~", "off"):
+    def test_any_unquoted_version_is_rejected_with_quote_instructions(self):
+        # Inverted per review round five: enumerating what YAML reads as
+        # non-strings had no natural end (1.0, true, null, 0b10, ...), so an
+        # unquoted value is invalid, full stop. This includes 0.4.0, which
+        # YAML would read as a string: quoting is the requirement, not a
+        # workaround for particular scalar forms.
+        for value in ("1.0", "true", "null", "~", "off", "0b10", "0.4.0"):
             code, report = self.run_check(
                 {
                     "skills/sepia/SKILL.md": skill_md(
@@ -253,18 +245,6 @@ class CheckVersionsCase(unittest.TestCase):
             )
             self.assertEqual(code, 1, f"version: {value} should be rejected")
             self.assertIn("quote it", report)
-
-    def test_an_unquoted_dotted_version_is_a_plain_yaml_string_and_accepted(self):
-        # 0.4.0 is not a valid YAML number, so unquoted it is already a
-        # string; rejecting it would be a false red.
-        code, report = self.run_check(
-            {
-                "skills/sepia/SKILL.md": skill_md(
-                    ["name: sepia", "metadata:", "  version: 0.4.0"]
-                )
-            }
-        )
-        self.assertEqual(code, 0)
 
     def test_quoted_whitespace_in_frontmatter_is_held_to_the_json_rule(self):
         code, report = self.run_check(
@@ -277,12 +257,28 @@ class CheckVersionsCase(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("surrounding whitespace", report)
 
-    def test_flow_style_unquoted_number_is_rejected_too(self):
-        code, report = self.run_check(
-            {"skills/sepia/SKILL.md": skill_md(["name: sepia", "metadata: {version: 1.0}"])}
-        )
-        self.assertEqual(code, 1)
-        self.assertIn("quote it", report)
+    def test_flow_style_unquoted_values_are_rejected_too(self):
+        for value in ("1.0", "0.4.0"):
+            code, report = self.run_check(
+                {"skills/sepia/SKILL.md": skill_md(["name: sepia", f"metadata: {{version: {value}}}"])}
+            )
+            self.assertEqual(code, 1, f"flow version: {value} should be rejected")
+            self.assertIn("quote it", report)
+
+    def test_a_repository_under_a_skipped_ancestor_name_still_scans(self):
+        # Review round five: SKIP_DIRS applied to absolute path parts made a
+        # checkout at .../venv/<repo> skip every file and report all required
+        # manifests missing. Only directories below root may match.
+        nested = self.root / "venv" / "repo"
+        for rel, content in BASELINE.items():
+            path = nested / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if isinstance(content, dict):
+                content = json.dumps(content, indent=2) + "\n"
+            path.write_text(content, encoding="utf-8")
+        code, report = check_versions.run(nested)
+        self.assertEqual(code, 0)
+        self.assertIn("3 declarations, all 0.4.0", report)
 
     # --- flow-style metadata ------------------------------------------------
 

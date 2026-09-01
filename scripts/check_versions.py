@@ -65,7 +65,10 @@ def _iter_files(root):
     for path in sorted(root.rglob("*")):
         if not path.is_file():
             continue
-        if any(part in SKIP_DIRS for part in path.parts):
+        # Only the directories BELOW root count: a repository checked out at
+        # /work/venv/sepia must not have every file skipped because an
+        # ancestor happens to be named venv (review round 5).
+        if any(part in SKIP_DIRS for part in path.relative_to(root).parts[:-1]):
             continue
         yield path
 
@@ -78,29 +81,17 @@ def _valid(value):
     return isinstance(value, str) and value != "" and value == value.strip()
 
 
-# Unquoted scalars that YAML reads as something other than a string. Per the
-# maintainer's direction the scanner stays a scanner: no YAML typing is
-# implemented, these are simply rejected with instructions to quote the value.
-_YAML_NONSTRING_RE = re.compile(
-    r"^(?:[-+]?(?:\d+|\d*\.\d+|\d+\.\d*)(?:[eE][-+]?\d+)?"
-    r"|0x[0-9a-fA-F]+|0o[0-7]+"
-    r"|[-+]?\.(?:inf|Inf|INF)|\.(?:nan|NaN|NAN)"
-    r"|true|True|TRUE|false|False|FALSE"
-    r"|yes|Yes|YES|no|No|NO|on|On|ON|off|Off|OFF"
-    r"|null|Null|NULL|~)$"
-)
-
-
 def _frontmatter_scalar(raw, rel):
     """(version_or_None, invalid) for one frontmatter version value.
 
     The shared value rules for both block and flow style. A quoted value is
     taken literally (minus the quotes) and then held to the same
     no-surrounding-whitespace rule as the JSON manifests. An unquoted value
-    that YAML would read as a number, boolean or null is rejected with
-    instructions to quote it, so `version: 1.0` cannot masquerade as the
-    string "1.0"; an unquoted value like 0.4.0 is a plain YAML string and is
-    accepted as such.
+    is invalid, full stop, with instructions to quote it. The first cut tried
+    to enumerate what YAML reads as non-strings and the enumeration had no
+    natural end (1.0, then true and null, then 0b10, then sexagesimal), so per
+    review the rule is inverted: quoting is the requirement, and this whole
+    class of finding closes permanently.
     """
     raw = raw.split(" #")[0].strip()
     if raw == "":
@@ -112,11 +103,7 @@ def _frontmatter_scalar(raw, rel):
         if value != value.strip():
             return None, [(rel, f"metadata.version {value!r} has surrounding whitespace")]
         return value, []
-    if _YAML_NONSTRING_RE.match(raw):
-        return None, [(rel,
-            f"metadata.version {raw} is unquoted and YAML would read it as a "
-            "number, boolean or null, not a string; quote it")]
-    return raw, []
+    return None, [(rel, f"metadata.version {raw} is unquoted; quote it")]
 
 
 def read_json_versions(path, rel):
