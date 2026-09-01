@@ -1,0 +1,17 @@
+name: version consistency
+
+# Runs on every push and pull request. The check is a single standard-library
+# script, so there is nothing to install and no lockfile to keep current.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # ubuntu-latest ships a python3, so no setup step is needed.
+      - run: python3 scripts/check_versions.py
