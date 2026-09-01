@@ -194,6 +194,96 @@ class CheckVersionsCase(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("3 declarations, all 0.4.0", report)
 
+    # --- review round four: whitespace, comments, unquoted scalars ----------
+
+    def test_surrounding_whitespace_in_a_json_version_is_invalid_not_normalized(self):
+        # " 0.4.0 " is not the same advertised version as "0.4.0"; stripping
+        # it away would hide a manifest that differs from its siblings.
+        code, report = self.run_check(
+            {".codex-plugin/plugin.json": {"name": "sepia", "version": " 0.4.0 "}}
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("surrounding whitespace", report)
+
+    def test_an_unindented_comment_does_not_close_the_metadata_block(self):
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ["name: sepia", "metadata:", "# version used for packaging", '  version: "0.4.0"']
+                )
+            }
+        )
+        self.assertEqual(code, 0)
+        self.assertIn("3 declarations, all 0.4.0", report)
+
+    def test_an_indented_comment_does_not_fix_the_child_indentation(self):
+        # If the comment were treated as the first child, its indentation
+        # would become the required level and the real version would be
+        # skipped as "wrong depth".
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ["name: sepia", "metadata:", "    # a deeper comment", '  version: "0.4.0"']
+                )
+            }
+        )
+        self.assertEqual(code, 0)
+
+    def test_an_unquoted_numeric_version_is_rejected_with_quote_instructions(self):
+        # YAML reads version: 1.0 as a number; the scanner stays a scanner and
+        # rejects it rather than implementing YAML typing.
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ["name: sepia", "metadata:", "  version: 1.0"]
+                )
+            }
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("quote it", report)
+
+    def test_unquoted_booleans_and_nulls_are_rejected_too(self):
+        for value in ("true", "null", "~", "off"):
+            code, report = self.run_check(
+                {
+                    "skills/sepia/SKILL.md": skill_md(
+                        ["name: sepia", "metadata:", f"  version: {value}"]
+                    )
+                }
+            )
+            self.assertEqual(code, 1, f"version: {value} should be rejected")
+            self.assertIn("quote it", report)
+
+    def test_an_unquoted_dotted_version_is_a_plain_yaml_string_and_accepted(self):
+        # 0.4.0 is not a valid YAML number, so unquoted it is already a
+        # string; rejecting it would be a false red.
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ["name: sepia", "metadata:", "  version: 0.4.0"]
+                )
+            }
+        )
+        self.assertEqual(code, 0)
+
+    def test_quoted_whitespace_in_frontmatter_is_held_to_the_json_rule(self):
+        code, report = self.run_check(
+            {
+                "skills/sepia/SKILL.md": skill_md(
+                    ["name: sepia", "metadata:", '  version: " 0.4.0 "']
+                )
+            }
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("surrounding whitespace", report)
+
+    def test_flow_style_unquoted_number_is_rejected_too(self):
+        code, report = self.run_check(
+            {"skills/sepia/SKILL.md": skill_md(["name: sepia", "metadata: {version: 1.0}"])}
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("quote it", report)
+
     # --- flow-style metadata ------------------------------------------------
 
     def test_flow_style_metadata_is_read_not_reported_missing(self):

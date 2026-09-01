@@ -71,7 +71,52 @@ def _iter_files(root):
 
 
 def _valid(value):
-    return isinstance(value, str) and value.strip() != ""
+    """A well-formed declaration: a non-empty string with no surrounding
+    whitespace. " 0.4.0 " is not the same advertised version as "0.4.0", and
+    normalizing it away would hide a manifest that differs from its siblings,
+    so it is reported instead of stripped (review round 4)."""
+    return isinstance(value, str) and value != "" and value == value.strip()
+
+
+# Unquoted scalars that YAML reads as something other than a string. Per the
+# maintainer's direction the scanner stays a scanner: no YAML typing is
+# implemented, these are simply rejected with instructions to quote the value.
+_YAML_NONSTRING_RE = re.compile(
+    r"^(?:[-+]?(?:\d+|\d*\.\d+|\d+\.\d*)(?:[eE][-+]?\d+)?"
+    r"|0x[0-9a-fA-F]+|0o[0-7]+"
+    r"|[-+]?\.(?:inf|Inf|INF)|\.(?:nan|NaN|NAN)"
+    r"|true|True|TRUE|false|False|FALSE"
+    r"|yes|Yes|YES|no|No|NO|on|On|ON|off|Off|OFF"
+    r"|null|Null|NULL|~)$"
+)
+
+
+def _frontmatter_scalar(raw, rel):
+    """(version_or_None, invalid) for one frontmatter version value.
+
+    The shared value rules for both block and flow style. A quoted value is
+    taken literally (minus the quotes) and then held to the same
+    no-surrounding-whitespace rule as the JSON manifests. An unquoted value
+    that YAML would read as a number, boolean or null is rejected with
+    instructions to quote it, so `version: 1.0` cannot masquerade as the
+    string "1.0"; an unquoted value like 0.4.0 is a plain YAML string and is
+    accepted as such.
+    """
+    raw = raw.split(" #")[0].strip()
+    if raw == "":
+        return None, [(rel, "metadata.version is present but empty")]
+    if len(raw) >= 2 and raw[0] == raw[-1] and raw[0] in "\"'":
+        value = raw[1:-1]
+        if value.strip() == "":
+            return None, [(rel, "metadata.version is present but empty")]
+        if value != value.strip():
+            return None, [(rel, f"metadata.version {value!r} has surrounding whitespace")]
+        return value, []
+    if _YAML_NONSTRING_RE.match(raw):
+        return None, [(rel,
+            f"metadata.version {raw} is unquoted and YAML would read it as a "
+            "number, boolean or null, not a string; quote it")]
+    return raw, []
 
 
 def read_json_versions(path, rel):
@@ -92,16 +137,16 @@ def read_json_versions(path, rel):
     if isinstance(data, dict):
         if "version" in data:
             if _valid(data["version"]):
-                declared.append((rel, data["version"].strip()))
+                declared.append((rel, data["version"]))
             else:
-                invalid.append((rel, f"version is {data['version']!r}, not a non-empty string"))
+                invalid.append((rel, f"version is {data['version']!r}, not a non-empty string without surrounding whitespace"))
         for index, entry in enumerate(data.get("plugins") or []):
             if isinstance(entry, dict) and "version" in entry:
                 label = f"{rel} → plugins[{index}]"
                 if _valid(entry["version"]):
-                    declared.append((label, entry["version"].strip()))
+                    declared.append((label, entry["version"]))
                 else:
-                    invalid.append((label, f"version is {entry['version']!r}, not a non-empty string"))
+                    invalid.append((label, f"version is {entry['version']!r}, not a non-empty string without surrounding whitespace"))
     return declared, invalid
 
 
@@ -129,10 +174,7 @@ def _flow_metadata_version(rest, rel):
     match = re.search(r"(?:^|,)\s*version:\s*([^,]*)", inner)
     if not match:
         return None, []
-    raw = match.group(1).strip().strip("\"'")
-    if raw:
-        return raw, []
-    return None, [(rel, "metadata.version is present but empty")]
+    return _frontmatter_scalar(match.group(1), rel)
 
 
 def read_frontmatter_version(path, rel):
@@ -164,6 +206,11 @@ def read_frontmatter_version(path, rel):
     for line in text[3:end].splitlines():
         if not line.strip():
             continue
+        if line.lstrip().startswith("#"):
+            # A comment carries no structure at any indentation; an unindented
+            # one between metadata: and its children must not read as a new
+            # top-level key that closes the block (review round 4).
+            continue
         if not line[:1].isspace():
             head, sep, rest = line.partition(":")
             if head.strip() == "metadata" and sep:
@@ -187,10 +234,7 @@ def read_frontmatter_version(path, rel):
             continue
         stripped = line.strip()
         if stripped.startswith("version:"):
-            raw = stripped[len("version:"):].split(" #")[0].strip().strip("\"'")
-            if raw:
-                return raw, []
-            return None, [(rel, "metadata.version is present but empty")]
+            return _frontmatter_scalar(stripped[len("version:"):], rel)
     return None, []
 
 
